@@ -1,0 +1,72 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RouteWaypoint = void 0;
+const typeorm_1 = require("typeorm");
+const delivery_entity_1 = require("../../deliveries/entities/delivery.entity");
+let RouteWaypoint = class RouteWaypoint {
+    id;
+    delivery_id;
+    stop_order;
+    address;
+    lat;
+    lng;
+    is_pickup;
+    arrived_at;
+    left_at;
+    delivery;
+};
+exports.RouteWaypoint = RouteWaypoint;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], RouteWaypoint.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'delivery_id', type: 'uuid' }),
+    __metadata("design:type", String)
+], RouteWaypoint.prototype, "delivery_id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'stop_order', type: 'smallint' }),
+    __metadata("design:type", Number)
+], RouteWaypoint.prototype, "stop_order", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text' }),
+    __metadata("design:type", String)
+], RouteWaypoint.prototype, "address", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 7, nullable: true }),
+    __metadata("design:type", Object)
+], RouteWaypoint.prototype, "lat", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 7, nullable: true }),
+    __metadata("design:type", Object)
+], RouteWaypoint.prototype, "lng", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'is_pickup', type: 'boolean', default: false }),
+    __metadata("design:type", Boolean)
+], RouteWaypoint.prototype, "is_pickup", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'arrived_at', type: 'timestamptz', nullable: true }),
+    __metadata("design:type", Object)
+], RouteWaypoint.prototype, "arrived_at", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'left_at', type: 'timestamptz', nullable: true }),
+    __metadata("design:type", Object)
+], RouteWaypoint.prototype, "left_at", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => delivery_entity_1.Delivery, { onDelete: 'CASCADE' }),
+    (0, typeorm_1.JoinColumn)({ name: 'delivery_id' }),
+    __metadata("design:type", delivery_entity_1.Delivery)
+], RouteWaypoint.prototype, "delivery", void 0);
+exports.RouteWaypoint = RouteWaypoint = __decorate([
+    (0, typeorm_1.Entity)({ name: 'route_waypoints' })
+], RouteWaypoint);
+//# sourceMappingURL=route-waypoint.entity.js.map

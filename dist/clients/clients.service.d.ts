@@ -1,0 +1,13 @@
+import { Repository } from 'typeorm';
+import { Client } from './entities/client.entity';
+import { CreateClientDto } from './dto/create-client.dto';
+import { UpdateClientDto } from './dto/update-client.dto';
+export declare class ClientService {
+    private readonly repository;
+    constructor(repository: Repository<Client>);
+    create(createDto: CreateClientDto): Promise<Client>;
+    findAll(skip?: number, take?: number): Promise<[Client[], number]>;
+    findOne(id: string): Promise<Client>;
+    update(id: string, updateDto: UpdateClientDto): Promise<Client>;
+    remove(id: string): Promise<void>;
+}
