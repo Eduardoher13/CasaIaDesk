@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { buildTypeOrmConfig } from './database/typeorm.config';
 import { UserModule } from './users/users.module';
 import { ClientModule } from './clients/clients.module';
 import { ProfessionalModule } from './professionals/professionals.module';
@@ -30,6 +33,12 @@ import { DeliveryTrackingModule } from './delivery_tracking/delivery_tracking.mo
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) =>
+        buildTypeOrmConfig(configService),
+    }),
     UserModule,
     ClientModule,
     ProfessionalModule,
