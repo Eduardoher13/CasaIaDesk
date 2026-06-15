@@ -4,6 +4,7 @@ export declare class Product {
     company_id: string;
     name: string;
     description: string | null;
+    image_url: string | null;
     price: number;
     stock: number;
     avg_rating: number;

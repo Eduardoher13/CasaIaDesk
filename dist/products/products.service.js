@@ -29,6 +29,43 @@ let ProductService = class ProductService {
     findAll(skip = 0, take = 10) {
         return this.repository.findAndCount({ skip, take });
     }
+    findByCompany(companyId, skip = 0, take = 50) {
+        return this.repository.findAndCount({
+            where: { company_id: companyId, is_active: true },
+            order: { name: 'ASC' },
+            skip,
+            take,
+        });
+    }
+    findActive(skip = 0, take = 20, search) {
+        const qb = this.repository
+            .createQueryBuilder('product')
+            .where('product.is_active = :isActive', { isActive: true });
+        if (search?.trim()) {
+            qb.andWhere('product.name ILIKE :search', {
+                search: `%${search.trim()}%`,
+            });
+        }
+        return qb
+            .orderBy('product.name', 'ASC')
+            .skip(skip)
+            .take(take)
+            .getManyAndCount();
+    }
+    async setImageUrl(id, imageUrl) {
+        const product = await this.findOne(id);
+        product.image_url = imageUrl;
+        return this.repository.save(product);
+    }
+    async updateStock(id, delta) {
+        const product = await this.findOne(id);
+        const newStock = product.stock + delta;
+        if (newStock < 0) {
+            throw new common_1.BadRequestException('Stock cannot be negative');
+        }
+        product.stock = newStock;
+        return this.repository.save(product);
+    }
     async findOne(id) {
         const entity = await this.repository.findOne({ where: { id } });
         if (!entity)

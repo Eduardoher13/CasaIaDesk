@@ -198,7 +198,8 @@ async function seed() {
     productsData.map((p) => ({
       company_id: company.id,
       name: p.name,
-      description: `Imagen: ${p.image}\n\n${p.description}`,
+      description: p.description,
+      image_url: p.image,
       price: p.price,
       stock: p.stock,
       avg_rating: 4.5,

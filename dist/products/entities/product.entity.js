@@ -17,6 +17,7 @@ let Product = class Product {
     company_id;
     name;
     description;
+    image_url;
     price;
     stock;
     avg_rating;
@@ -40,6 +41,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'text', nullable: true }),
     __metadata("design:type", Object)
 ], Product.prototype, "description", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'image_url', type: 'text', nullable: true }),
+    __metadata("design:type", Object)
+], Product.prototype, "image_url", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2 }),
     __metadata("design:type", Number)

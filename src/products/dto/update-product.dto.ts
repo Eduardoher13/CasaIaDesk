@@ -14,6 +14,10 @@ export class UpdateProductDto {
   description?: string;
 
   @IsOptional()
+  @IsString()
+  image_url?: string;
+
+  @IsOptional()
   @IsNumber()
   price?: number;
 

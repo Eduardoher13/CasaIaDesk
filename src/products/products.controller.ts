@@ -1,7 +1,17 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ProductService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { SetProductImageDto } from './dto/set-product-image.dto';
 
 @Controller('products')
 export class ProductController {
@@ -17,9 +27,36 @@ export class ProductController {
     return this.service.findAll(parseInt(skip), parseInt(take));
   }
 
+  @Get('active')
+  findActive(
+    @Query('skip') skip = '0',
+    @Query('take') take = '20',
+    @Query('search') search?: string,
+  ) {
+    return this.service.findActive(parseInt(skip), parseInt(take), search);
+  }
+
+  @Get('by-company/:companyId')
+  findByCompany(
+    @Param('companyId') companyId: string,
+    @Query('skip') skip = '0',
+    @Query('take') take = '50',
+  ) {
+    return this.service.findByCompany(
+      companyId,
+      parseInt(skip),
+      parseInt(take),
+    );
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);
+  }
+
+  @Patch(':id/image')
+  setImageUrl(@Param('id') id: string, @Body() dto: SetProductImageDto) {
+    return this.service.setImageUrl(id, dto.image_url);
   }
 
   @Patch(':id')

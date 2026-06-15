@@ -127,7 +127,7 @@ Default: `camioneta`. Otros valores libres en string.
    - Admin → `POST /admins`
 
 ### 2. E-commerce (cliente)
-1. `GET /products` — grid de productos
+1. `GET /products/active` — grid de productos con `image_url`
 2. `POST /orders` — crear pedido (`status: carrito`)
 3. `POST /order-items` — agregar productos al carrito
 4. `PATCH /orders/:id` — actualizar total, cambiar a `pagado`, setear `paid_at`
@@ -335,15 +335,24 @@ Relación **profesional ↔ especialidad** (tabla pivote).
 
 ### 📦 Products — `/products`
 
-Catálogo de productos de empresas.
+Catálogo de productos de empresas. Las imágenes se guardan en **`image_url`** (URL pública de Supabase Storage u otra CDN).
 
 | Método | Ruta | Para qué sirve en el frontend |
 |--------|------|-------------------------------|
 | `POST` | `/products` | Empresa: crear producto |
-| `GET` | `/products` | **Catálogo / tienda** — cards con precio, stock, rating |
-| `GET` | `/products/:id` | **Detalle producto** — descripción, botón agregar al carrito |
-| `PATCH` | `/products/:id` | Empresa: editar precio, stock, activar/desactivar |
-| `DELETE` | `/products/:id` | Empresa: eliminar producto |
+| `GET` | `/products` | Listado admin / paginado general |
+| `GET` | `/products/active` | **Catálogo cliente** — solo activos, búsqueda opcional |
+| `GET` | `/products/by-company/:companyId` | **Mi catálogo (empresa)** — productos activos de la tienda |
+| `GET` | `/products/:id` | Detalle producto |
+| `PATCH` | `/products/:id/image` | Asignar URL de imagen tras upload a Supabase |
+| `PATCH` | `/products/:id` | Editar precio, stock, activar/desactivar |
+| `DELETE` | `/products/:id` | Eliminar producto |
+
+**GET `/products/active`** — query: `skip`, `take`, `search` (ILIKE en `name`)
+
+**GET `/products/by-company/:companyId`** — query: `skip`, `take`
+
+**PATCH `/products/:id/image`** — body: `{ "image_url": "https://..." }`
 
 **POST body:**
 
@@ -352,10 +361,15 @@ Catálogo de productos de empresas.
 | `company_id` | UUID | ✅ | Empresa dueña |
 | `name` | string | ✅ | Nombre producto |
 | `description` | string | | Descripción larga |
+| `image_url` | string | | URL imagen (Supabase Storage) |
 | `price` | number | ✅ | Precio |
 | `stock` | int | | Inventario |
 | `avg_rating` | number | | Rating promedio |
 | `is_active` | boolean | | Visible en tienda |
+
+**Response incluye:** `id`, `image_url`, y demás columnas de la entidad.
+
+**Servicio interno (sin endpoint aún):** `updateStock(id, delta)` — ajusta inventario validando `stock >= 0`.
 
 ---
 
@@ -726,7 +740,7 @@ User (driver) ──→ Vehicle
 
 ---
 
-## Resumen de endpoints (130 total)
+## Resumen de endpoints (133 total)
 
 | Módulo | Endpoints |
 |--------|-----------|
@@ -737,7 +751,7 @@ User (driver) ──→ Vehicle
 | admins | 5 |
 | specialties | 5 |
 | professional-specialties | 5 |
-| products | 5 |
+| products | 8 |
 | orders | 5 |
 | order-items | 5 |
 | service-requests | 5 |
