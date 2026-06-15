@@ -26,6 +26,47 @@ let UserService = class UserService {
         const entity = this.repository.create(createDto);
         return this.repository.save(entity);
     }
+    async register(registerDto) {
+        const existing = await this.repository.findOne({
+            where: { email: registerDto.email },
+        });
+        if (existing) {
+            throw new common_1.ConflictException('Email already registered');
+        }
+        const user = await this.repository.save(this.repository.create({
+            email: registerDto.email,
+            password_hash: registerDto.password,
+            role: registerDto.role,
+            first_name: registerDto.first_name,
+            last_name: registerDto.last_name,
+            phone: registerDto.phone,
+            avatar_url: registerDto.avatar_url,
+            is_active: registerDto.is_active ?? true,
+            lat: registerDto.lat,
+            lng: registerDto.lng,
+            city: registerDto.city,
+        }));
+        return this.sanitizeUser(user);
+    }
+    async findByEmail(email) {
+        const user = await this.repository.findOne({
+            where: { email: decodeURIComponent(email) },
+        });
+        if (!user) {
+            throw new common_1.NotFoundException(`User with email ${email} not found`);
+        }
+        return this.sanitizeUser(user);
+    }
+    async updateLocation(id, locationDto) {
+        const user = await this.findOne(id);
+        user.lat = locationDto.lat;
+        user.lng = locationDto.lng;
+        if (locationDto.city !== undefined) {
+            user.city = locationDto.city;
+        }
+        const saved = await this.repository.save(user);
+        return this.sanitizeUser(saved);
+    }
     findAll(skip = 0, take = 10) {
         return this.repository.findAndCount({ skip, take, withDeleted: false });
     }
@@ -43,6 +84,10 @@ let UserService = class UserService {
     async remove(id) {
         const entity = await this.findOne(id);
         await this.repository.softRemove(entity);
+    }
+    sanitizeUser(user) {
+        const { password_hash: _, ...safe } = user;
+        return safe;
     }
 };
 exports.UserService = UserService;

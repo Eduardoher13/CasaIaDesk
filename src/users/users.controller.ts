@@ -1,7 +1,17 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { UserService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateLocationDto } from './dto/update-location.dto';
 
 @Controller('users')
 export class UserController {
@@ -17,9 +27,22 @@ export class UserController {
     return this.service.findAll(parseInt(skip), parseInt(take));
   }
 
+  @Get('by-email/:email')
+  findByEmail(@Param('email') email: string) {
+    return this.service.findByEmail(email);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);
+  }
+
+  @Patch(':id/location')
+  updateLocation(
+    @Param('id') id: string,
+    @Body() locationDto: UpdateLocationDto,
+  ) {
+    return this.service.updateLocation(id, locationDto);
   }
 
   @Patch(':id')

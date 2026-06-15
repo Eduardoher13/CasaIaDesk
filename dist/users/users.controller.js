@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const users_service_1 = require("./users.service");
 const create_user_dto_1 = require("./dto/create-user.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
+const update_location_dto_1 = require("./dto/update-location.dto");
 let UserController = class UserController {
     service;
     constructor(service) {
@@ -28,8 +29,14 @@ let UserController = class UserController {
     findAll(skip = '0', take = '10') {
         return this.service.findAll(parseInt(skip), parseInt(take));
     }
+    findByEmail(email) {
+        return this.service.findByEmail(email);
+    }
     findOne(id) {
         return this.service.findOne(id);
+    }
+    updateLocation(id, locationDto) {
+        return this.service.updateLocation(id, locationDto);
     }
     update(id, updateDto) {
         return this.service.update(id, updateDto);
@@ -55,12 +62,27 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], UserController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.Get)('by-email/:email'),
+    __param(0, (0, common_1.Param)('email')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "findByEmail", null);
+__decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], UserController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':id/location'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_location_dto_1.UpdateLocationDto]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "updateLocation", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Param)('id')),

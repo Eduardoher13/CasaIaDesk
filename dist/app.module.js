@@ -13,6 +13,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const typeorm_config_1 = require("./database/typeorm.config");
+const auth_module_1 = require("./auth/auth.module");
 const users_module_1 = require("./users/users.module");
 const clients_module_1 = require("./clients/clients.module");
 const professionals_module_1 = require("./professionals/professionals.module");
@@ -50,6 +51,7 @@ exports.AppModule = AppModule = __decorate([
                 inject: [config_1.ConfigService],
                 useFactory: (configService) => (0, typeorm_config_1.buildTypeOrmConfig)(configService),
             }),
+            auth_module_1.AuthModule,
             users_module_1.UserModule,
             clients_module_1.ClientModule,
             professionals_module_1.ProfessionalModule,

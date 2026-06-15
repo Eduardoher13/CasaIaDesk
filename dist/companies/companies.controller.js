@@ -28,6 +28,12 @@ let CompanyController = class CompanyController {
     findAll(skip = '0', take = '10') {
         return this.service.findAll(parseInt(skip), parseInt(take));
     }
+    findByUserId(userId) {
+        return this.service.findByUserId(userId);
+    }
+    getStorefront(id) {
+        return this.service.getStorefront(id);
+    }
     findOne(id) {
         return this.service.findOne(id);
     }
@@ -54,6 +60,20 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], CompanyController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('by-user/:userId'),
+    __param(0, (0, common_1.Param)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], CompanyController.prototype, "findByUserId", null);
+__decorate([
+    (0, common_1.Get)(':id/storefront'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], CompanyController.prototype, "getStorefront", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),

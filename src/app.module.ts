@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { buildTypeOrmConfig } from './database/typeorm.config';
+import { AuthModule } from './auth/auth.module';
 import { UserModule } from './users/users.module';
 import { ClientModule } from './clients/clients.module';
 import { ProfessionalModule } from './professionals/professionals.module';
@@ -39,6 +40,7 @@ import { DeliveryTrackingModule } from './delivery_tracking/delivery_tracking.mo
       useFactory: (configService: ConfigService) =>
         buildTypeOrmConfig(configService),
     }),
+    AuthModule,
     UserModule,
     ClientModule,
     ProfessionalModule,

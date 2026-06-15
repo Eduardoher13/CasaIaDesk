@@ -17,10 +17,13 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const company_entity_1 = require("./entities/company.entity");
+const product_entity_1 = require("../products/entities/product.entity");
 let CompanyService = class CompanyService {
     repository;
-    constructor(repository) {
+    productRepository;
+    constructor(repository, productRepository) {
         this.repository = repository;
+        this.productRepository = productRepository;
     }
     create(createDto) {
         const entity = this.repository.create(createDto);
@@ -28,6 +31,23 @@ let CompanyService = class CompanyService {
     }
     findAll(skip = 0, take = 10) {
         return this.repository.findAndCount({ skip, take });
+    }
+    async findByUserId(userId) {
+        const company = await this.repository.findOne({
+            where: { user_id: userId },
+        });
+        if (!company) {
+            throw new common_1.NotFoundException(`Company for user ${userId} not found`);
+        }
+        return company;
+    }
+    async getStorefront(id) {
+        const company = await this.findOne(id);
+        const products = await this.productRepository.find({
+            where: { company_id: id, is_active: true },
+            order: { name: 'ASC' },
+        });
+        return { company, products };
     }
     async findOne(id) {
         const entity = await this.repository.findOne({ where: { id } });
@@ -49,6 +69,8 @@ exports.CompanyService = CompanyService;
 exports.CompanyService = CompanyService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(company_entity_1.Company)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(1, (0, typeorm_1.InjectRepository)(product_entity_1.Product)),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository])
 ], CompanyService);
 //# sourceMappingURL=companies.service.js.map

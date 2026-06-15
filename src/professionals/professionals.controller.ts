@@ -17,6 +17,16 @@ export class ProfessionalController {
     return this.service.findAll(parseInt(skip), parseInt(take));
   }
 
+  @Get('available')
+  findAvailable(@Query('skip') skip = '0', @Query('take') take = '10') {
+    return this.service.findAvailable(parseInt(skip), parseInt(take));
+  }
+
+  @Get('by-user/:userId')
+  findByUserId(@Param('userId') userId: string) {
+    return this.service.findByUserId(userId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);

@@ -28,6 +28,12 @@ let ProfessionalController = class ProfessionalController {
     findAll(skip = '0', take = '10') {
         return this.service.findAll(parseInt(skip), parseInt(take));
     }
+    findAvailable(skip = '0', take = '10') {
+        return this.service.findAvailable(parseInt(skip), parseInt(take));
+    }
+    findByUserId(userId) {
+        return this.service.findByUserId(userId);
+    }
     findOne(id) {
         return this.service.findOne(id);
     }
@@ -54,6 +60,21 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], ProfessionalController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('available'),
+    __param(0, (0, common_1.Query)('skip')),
+    __param(1, (0, common_1.Query)('take')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], ProfessionalController.prototype, "findAvailable", null);
+__decorate([
+    (0, common_1.Get)('by-user/:userId'),
+    __param(0, (0, common_1.Param)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ProfessionalController.prototype, "findByUserId", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),

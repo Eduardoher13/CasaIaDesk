@@ -6,6 +6,7 @@ export declare class ClientController {
     constructor(service: ClientService);
     create(createDto: CreateClientDto): Promise<import("./entities/client.entity").Client>;
     findAll(skip?: string, take?: string): Promise<[import("./entities/client.entity").Client[], number]>;
+    findByUserId(userId: string): Promise<import("./entities/client.entity").Client>;
     findOne(id: string): Promise<import("./entities/client.entity").Client>;
     update(id: string, updateDto: UpdateClientDto): Promise<import("./entities/client.entity").Client>;
     remove(id: string): Promise<void>;

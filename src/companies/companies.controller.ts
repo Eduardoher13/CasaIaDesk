@@ -17,6 +17,16 @@ export class CompanyController {
     return this.service.findAll(parseInt(skip), parseInt(take));
   }
 
+  @Get('by-user/:userId')
+  findByUserId(@Param('userId') userId: string) {
+    return this.service.findByUserId(userId);
+  }
+
+  @Get(':id/storefront')
+  getStorefront(@Param('id') id: string) {
+    return this.service.getStorefront(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);

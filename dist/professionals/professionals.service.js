@@ -29,6 +29,26 @@ let ProfessionalService = class ProfessionalService {
     findAll(skip = 0, take = 10) {
         return this.repository.findAndCount({ skip, take });
     }
+    async findByUserId(userId) {
+        const professional = await this.repository.findOne({
+            where: { user_id: userId },
+            relations: { user: true },
+        });
+        if (!professional) {
+            throw new common_1.NotFoundException(`Professional for user ${userId} not found`);
+        }
+        return this.sanitizeProfessional(professional);
+    }
+    async findAvailable(skip = 0, take = 10) {
+        const [data, total] = await this.repository.findAndCount({
+            where: { is_available: true },
+            relations: { user: true },
+            order: { avg_rating: 'DESC' },
+            skip,
+            take,
+        });
+        return [data.map((p) => this.sanitizeProfessional(p)), total];
+    }
     async findOne(id) {
         const entity = await this.repository.findOne({ where: { id } });
         if (!entity)
@@ -43,6 +63,12 @@ let ProfessionalService = class ProfessionalService {
     async remove(id) {
         const entity = await this.findOne(id);
         await this.repository.remove(entity);
+    }
+    sanitizeProfessional(professional) {
+        if (!professional.user)
+            return professional;
+        const { password_hash: _, ...user } = professional.user;
+        return { ...professional, user };
     }
 };
 exports.ProfessionalService = ProfessionalService;

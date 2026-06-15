@@ -29,6 +29,15 @@ let ClientService = class ClientService {
     findAll(skip = 0, take = 10) {
         return this.repository.findAndCount({ skip, take });
     }
+    async findByUserId(userId) {
+        const client = await this.repository.findOne({
+            where: { user_id: userId },
+        });
+        if (!client) {
+            throw new common_1.NotFoundException(`Client for user ${userId} not found`);
+        }
+        return client;
+    }
     async findOne(id) {
         const entity = await this.repository.findOne({ where: { id } });
         if (!entity)
