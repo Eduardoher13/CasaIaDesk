@@ -2,9 +2,31 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
 const common_1 = require("@nestjs/common");
+const config_1 = require("@nestjs/config");
 const app_module_1 = require("./app.module");
+async function listenOnPort(app, preferredPort, allowFallback) {
+    const maxAttempts = allowFallback ? 20 : 1;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const port = preferredPort + attempt;
+        try {
+            await app.listen(port);
+            if (attempt > 0) {
+                console.warn(`Puerto ${preferredPort} ocupado; API escuchando en ${port}.`);
+            }
+            return port;
+        }
+        catch (err) {
+            const error = err;
+            if (error.code !== 'EADDRINUSE' || attempt === maxAttempts - 1) {
+                throw err;
+            }
+        }
+    }
+    throw new Error(`No se pudo usar el puerto ${preferredPort}`);
+}
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    app.enableShutdownHooks();
     app.enableCors({
         origin: true,
         credentials: true,
@@ -15,8 +37,13 @@ async function bootstrap() {
         transform: true,
         transformOptions: { enableImplicitConversion: true },
     }));
-    const port = process.env.PORT ?? 8000;
-    await app.listen(port);
+    const configService = app.get(config_1.ConfigService);
+    const preferredPort = Number(configService.get('PORT', '8001'));
+    const isDev = configService.get('NODE_ENV') !== 'production';
+    if (!Number.isInteger(preferredPort) || preferredPort < 1) {
+        throw new Error(`Invalid PORT: ${configService.get('PORT')}`);
+    }
+    const port = await listenOnPort(app, preferredPort, isDev);
     console.log(`API running on http://localhost:${port}`);
 }
 bootstrap();

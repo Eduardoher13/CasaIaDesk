@@ -5,9 +5,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { toPaginatedResult } from '../common/pagination/pagination.util';
 import { Product } from './entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { FindProductsDto } from './dto/find-products.dto';
 
 @Injectable()
 export class ProductService {
@@ -21,35 +24,54 @@ export class ProductService {
     return this.repository.save(entity);
   }
 
-  findAll(skip = 0, take = 10) {
-    return this.repository.findAndCount({ skip, take });
-  }
+  async findAll(filters: PaginationQueryDto) {
+    const { limit = 10, offset = 0 } = filters;
 
-  findByCompany(companyId: string, skip = 0, take = 50) {
-    return this.repository.findAndCount({
-      where: { company_id: companyId, is_active: true },
-      order: { name: 'ASC' },
-      skip,
-      take,
-    });
-  }
-
-  findActive(skip = 0, take = 20, search?: string) {
     const qb = this.repository
       .createQueryBuilder('product')
-      .where('product.is_active = :isActive', { isActive: true });
+      .take(limit)
+      .skip(offset);
 
-    if (search?.trim()) {
-      qb.andWhere('product.name ILIKE :search', {
-        search: `%${search.trim()}%`,
-      });
+    qb.orderBy('product.name', 'ASC').addOrderBy('product.id', 'DESC');
+
+    const [data, total] = await qb.getManyAndCount();
+    return toPaginatedResult(data, total, limit, offset);
+  }
+
+  async findByCompany(companyId: string, filters: PaginationQueryDto) {
+    const { limit = 50, offset = 0 } = filters;
+
+    const qb = this.repository
+      .createQueryBuilder('product')
+      .where('product.company_id = :companyId', { companyId })
+      .andWhere('product.is_active = :isActive', { isActive: true })
+      .take(limit)
+      .skip(offset);
+
+    qb.orderBy('product.name', 'ASC').addOrderBy('product.id', 'DESC');
+
+    const [data, total] = await qb.getManyAndCount();
+    return toPaginatedResult(data, total, limit, offset);
+  }
+
+  async findActive(filters: FindProductsDto) {
+    const { limit = 20, offset = 0, q } = filters;
+
+    const qb = this.repository
+      .createQueryBuilder('product')
+      .where('product.is_active = :isActive', { isActive: true })
+      .take(limit)
+      .skip(offset);
+
+    if (q?.trim()) {
+      const search = `%${q.trim()}%`;
+      qb.andWhere('product.name ILIKE :search', { search });
     }
 
-    return qb
-      .orderBy('product.name', 'ASC')
-      .skip(skip)
-      .take(take)
-      .getManyAndCount();
+    qb.orderBy('product.name', 'ASC').addOrderBy('product.id', 'DESC');
+
+    const [data, total] = await qb.getManyAndCount();
+    return toPaginatedResult(data, total, limit, offset);
   }
 
   async setImageUrl(id: string, imageUrl: string) {

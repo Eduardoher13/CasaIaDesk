@@ -8,6 +8,8 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { FindProductsDto } from './dto/find-products.dto';
 import { ProductService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -23,30 +25,21 @@ export class ProductController {
   }
 
   @Get()
-  findAll(@Query('skip') skip = '0', @Query('take') take = '10') {
-    return this.service.findAll(parseInt(skip), parseInt(take));
+  findAll(@Query() filters: PaginationQueryDto) {
+    return this.service.findAll(filters);
   }
 
   @Get('active')
-  findActive(
-    @Query('skip') skip = '0',
-    @Query('take') take = '20',
-    @Query('search') search?: string,
-  ) {
-    return this.service.findActive(parseInt(skip), parseInt(take), search);
+  findActive(@Query() filters: FindProductsDto) {
+    return this.service.findActive(filters);
   }
 
   @Get('by-company/:companyId')
   findByCompany(
     @Param('companyId') companyId: string,
-    @Query('skip') skip = '0',
-    @Query('take') take = '50',
+    @Query() filters: PaginationQueryDto,
   ) {
-    return this.service.findByCompany(
-      companyId,
-      parseInt(skip),
-      parseInt(take),
-    );
+    return this.service.findByCompany(companyId, filters);
   }
 
   @Get(':id')

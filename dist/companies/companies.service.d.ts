@@ -1,4 +1,5 @@
 import { Repository } from 'typeorm';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { Company } from './entities/company.entity';
 import { Product } from '../products/entities/product.entity';
 import { CreateCompanyDto } from './dto/create-company.dto';
@@ -8,11 +9,11 @@ export declare class CompanyService {
     private readonly productRepository;
     constructor(repository: Repository<Company>, productRepository: Repository<Product>);
     create(createDto: CreateCompanyDto): Promise<Company>;
-    findAll(skip?: number, take?: number): Promise<[Company[], number]>;
+    findAll(filters: PaginationQueryDto): Promise<import("../common/pagination/pagination.util").PaginatedResult<Company>>;
     findByUserId(userId: string): Promise<Company>;
-    getStorefront(id: string): Promise<{
+    getStorefront(id: string, filters: PaginationQueryDto): Promise<{
         company: Company;
-        products: Product[];
+        products: import("../common/pagination/pagination.util").PaginatedResult<Product>;
     }>;
     findOne(id: string): Promise<Company>;
     update(id: string, updateDto: UpdateCompanyDto): Promise<Company>;

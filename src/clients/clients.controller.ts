@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { ClientService } from './clients.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
@@ -13,8 +14,8 @@ export class ClientController {
   }
 
   @Get()
-  findAll(@Query('skip') skip = '0', @Query('take') take = '10') {
-    return this.service.findAll(parseInt(skip), parseInt(take));
+  findAll(@Query() filters: PaginationQueryDto) {
+    return this.service.findAll(filters);
   }
 
   @Get('by-user/:userId')

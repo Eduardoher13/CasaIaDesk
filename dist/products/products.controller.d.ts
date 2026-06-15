@@ -1,3 +1,5 @@
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { FindProductsDto } from './dto/find-products.dto';
 import { ProductService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -6,9 +8,9 @@ export declare class ProductController {
     private readonly service;
     constructor(service: ProductService);
     create(createDto: CreateProductDto): Promise<import("./entities/product.entity").Product>;
-    findAll(skip?: string, take?: string): Promise<[import("./entities/product.entity").Product[], number]>;
-    findActive(skip?: string, take?: string, search?: string): Promise<[import("./entities/product.entity").Product[], number]>;
-    findByCompany(companyId: string, skip?: string, take?: string): Promise<[import("./entities/product.entity").Product[], number]>;
+    findAll(filters: PaginationQueryDto): Promise<import("../common/pagination/pagination.util").PaginatedResult<import("./entities/product.entity").Product>>;
+    findActive(filters: FindProductsDto): Promise<import("../common/pagination/pagination.util").PaginatedResult<import("./entities/product.entity").Product>>;
+    findByCompany(companyId: string, filters: PaginationQueryDto): Promise<import("../common/pagination/pagination.util").PaginatedResult<import("./entities/product.entity").Product>>;
     findOne(id: string): Promise<import("./entities/product.entity").Product>;
     setImageUrl(id: string, dto: SetProductImageDto): Promise<import("./entities/product.entity").Product>;
     update(id: string, updateDto: UpdateProductDto): Promise<import("./entities/product.entity").Product>;

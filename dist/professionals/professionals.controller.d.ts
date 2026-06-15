@@ -1,3 +1,4 @@
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { ProfessionalService } from './professionals.service';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
@@ -5,8 +6,8 @@ export declare class ProfessionalController {
     private readonly service;
     constructor(service: ProfessionalService);
     create(createDto: CreateProfessionalDto): Promise<import("./entities/professional.entity").Professional>;
-    findAll(skip?: string, take?: string): Promise<[import("./entities/professional.entity").Professional[], number]>;
-    findAvailable(skip?: string, take?: string): Promise<readonly [{
+    findAll(filters: PaginationQueryDto): Promise<import("../common/pagination/pagination.util").PaginatedResult<import("./entities/professional.entity").Professional>>;
+    findAvailable(filters: PaginationQueryDto): Promise<import("../common/pagination/pagination.util").PaginatedResult<{
         user: {
             id: string;
             email: string;
@@ -32,7 +33,7 @@ export declare class ProfessionalController {
         total_reviews: number;
         is_available: boolean;
         service_radius_km: number;
-    }[], number]>;
+    }>>;
     findByUserId(userId: string): Promise<{
         user: {
             id: string;

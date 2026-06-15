@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { toPaginatedResult } from '../common/pagination/pagination.util';
 import { Professional } from './entities/professional.entity';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
@@ -17,8 +19,18 @@ export class ProfessionalService {
     return this.repository.save(entity);
   }
 
-  findAll(skip = 0, take = 10) {
-    return this.repository.findAndCount({ skip, take });
+  async findAll(filters: PaginationQueryDto) {
+    const { limit = 10, offset = 0 } = filters;
+
+    const qb = this.repository
+      .createQueryBuilder('professional')
+      .take(limit)
+      .skip(offset);
+
+    qb.orderBy('professional.id', 'DESC');
+
+    const [data, total] = await qb.getManyAndCount();
+    return toPaginatedResult(data, total, limit, offset);
   }
 
   async findByUserId(userId: string) {
@@ -32,15 +44,24 @@ export class ProfessionalService {
     return this.sanitizeProfessional(professional);
   }
 
-  async findAvailable(skip = 0, take = 10) {
-    const [data, total] = await this.repository.findAndCount({
-      where: { is_available: true },
-      relations: { user: true },
-      order: { avg_rating: 'DESC' },
-      skip,
-      take,
-    });
-    return [data.map((p) => this.sanitizeProfessional(p)), total] as const;
+  async findAvailable(filters: PaginationQueryDto) {
+    const { limit = 10, offset = 0 } = filters;
+
+    const qb = this.repository
+      .createQueryBuilder('professional')
+      .leftJoinAndSelect('professional.user', 'user')
+      .where('professional.is_available = :isAvailable', { isAvailable: true })
+      .take(limit)
+      .skip(offset);
+
+    qb.orderBy('professional.avg_rating', 'DESC').addOrderBy(
+      'professional.id',
+      'DESC',
+    );
+
+    const [rows, total] = await qb.getManyAndCount();
+    const data = rows.map((p) => this.sanitizeProfessional(p));
+    return toPaginatedResult(data, total, limit, offset);
   }
 
   async findOne(id: string) {

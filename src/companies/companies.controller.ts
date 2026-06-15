@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { CompanyService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
@@ -13,8 +14,8 @@ export class CompanyController {
   }
 
   @Get()
-  findAll(@Query('skip') skip = '0', @Query('take') take = '10') {
-    return this.service.findAll(parseInt(skip), parseInt(take));
+  findAll(@Query() filters: PaginationQueryDto) {
+    return this.service.findAll(filters);
   }
 
   @Get('by-user/:userId')
@@ -23,8 +24,8 @@ export class CompanyController {
   }
 
   @Get(':id/storefront')
-  getStorefront(@Param('id') id: string) {
-    return this.service.getStorefront(id);
+  getStorefront(@Param('id') id: string, @Query() filters: PaginationQueryDto) {
+    return this.service.getStorefront(id, filters);
   }
 
   @Get(':id')

@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, ParseIntPipe } from '@nestjs/common';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { SpecialtyService } from './specialties.service';
 import { CreateSpecialtyDto } from './dto/create-specialty.dto';
 import { UpdateSpecialtyDto } from './dto/update-specialty.dto';
@@ -13,8 +14,8 @@ export class SpecialtyController {
   }
 
   @Get()
-  findAll(@Query('skip') skip = '0', @Query('take') take = '10') {
-    return this.service.findAll(parseInt(skip), parseInt(take));
+  findAll(@Query() filters: PaginationQueryDto) {
+    return this.service.findAll(filters);
   }
 
   @Get(':id')

@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { ReviewService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
@@ -13,8 +14,8 @@ export class ReviewController {
   }
 
   @Get()
-  findAll(@Query('skip') skip = '0', @Query('take') take = '10') {
-    return this.service.findAll(parseInt(skip), parseInt(take));
+  findAll(@Query() filters: PaginationQueryDto) {
+    return this.service.findAll(filters);
   }
 
   @Get(':id')

@@ -16,6 +16,7 @@ exports.CompanyService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const pagination_util_1 = require("../common/pagination/pagination.util");
 const company_entity_1 = require("./entities/company.entity");
 const product_entity_1 = require("../products/entities/product.entity");
 let CompanyService = class CompanyService {
@@ -29,8 +30,15 @@ let CompanyService = class CompanyService {
         const entity = this.repository.create(createDto);
         return this.repository.save(entity);
     }
-    findAll(skip = 0, take = 10) {
-        return this.repository.findAndCount({ skip, take });
+    async findAll(filters) {
+        const { limit = 10, offset = 0 } = filters;
+        const qb = this.repository
+            .createQueryBuilder('company')
+            .take(limit)
+            .skip(offset);
+        qb.orderBy('company.id', 'DESC');
+        const [data, total] = await qb.getManyAndCount();
+        return (0, pagination_util_1.toPaginatedResult)(data, total, limit, offset);
     }
     async findByUserId(userId) {
         const company = await this.repository.findOne({
@@ -41,13 +49,21 @@ let CompanyService = class CompanyService {
         }
         return company;
     }
-    async getStorefront(id) {
+    async getStorefront(id, filters) {
+        const { limit = 10, offset = 0 } = filters;
         const company = await this.findOne(id);
-        const products = await this.productRepository.find({
-            where: { company_id: id, is_active: true },
-            order: { name: 'ASC' },
-        });
-        return { company, products };
+        const qb = this.productRepository
+            .createQueryBuilder('product')
+            .where('product.company_id = :companyId', { companyId: id })
+            .andWhere('product.is_active = :isActive', { isActive: true })
+            .take(limit)
+            .skip(offset);
+        qb.orderBy('product.name', 'ASC').addOrderBy('product.id', 'DESC');
+        const [products, total] = await qb.getManyAndCount();
+        return {
+            company,
+            products: (0, pagination_util_1.toPaginatedResult)(products, total, limit, offset),
+        };
     }
     async findOne(id) {
         const entity = await this.repository.findOne({ where: { id } });

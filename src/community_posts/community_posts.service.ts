@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { toPaginatedResult } from '../common/pagination/pagination.util';
 import { CommunityPost } from './entities/community-post.entity';
 import { CreateCommunityPostDto } from './dto/create-community-post.dto';
 import { UpdateCommunityPostDto } from './dto/update-community-post.dto';
@@ -17,8 +19,18 @@ export class CommunityPostService {
     return this.repository.save(entity);
   }
 
-  findAll(skip = 0, take = 10) {
-    return this.repository.findAndCount({ skip, take });
+  async findAll(filters: PaginationQueryDto) {
+    const { limit = 10, offset = 0 } = filters;
+
+    const qb = this.repository
+      .createQueryBuilder('communityPost')
+      .take(limit)
+      .skip(offset);
+
+    qb.orderBy('communityPost.created_at', 'DESC').addOrderBy('communityPost.id', 'DESC');
+
+    const [data, total] = await qb.getManyAndCount();
+    return toPaginatedResult(data, total, limit, offset);
   }
 
   async findOne(id: string) {

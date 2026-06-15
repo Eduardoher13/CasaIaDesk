@@ -1,4 +1,5 @@
 import { Repository } from 'typeorm';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { Professional } from './entities/professional.entity';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
@@ -6,7 +7,7 @@ export declare class ProfessionalService {
     private readonly repository;
     constructor(repository: Repository<Professional>);
     create(createDto: CreateProfessionalDto): Promise<Professional>;
-    findAll(skip?: number, take?: number): Promise<[Professional[], number]>;
+    findAll(filters: PaginationQueryDto): Promise<import("../common/pagination/pagination.util").PaginatedResult<Professional>>;
     findByUserId(userId: string): Promise<{
         user: {
             id: string;
@@ -34,7 +35,7 @@ export declare class ProfessionalService {
         is_available: boolean;
         service_radius_km: number;
     }>;
-    findAvailable(skip?: number, take?: number): Promise<readonly [{
+    findAvailable(filters: PaginationQueryDto): Promise<import("../common/pagination/pagination.util").PaginatedResult<{
         user: {
             id: string;
             email: string;
@@ -60,7 +61,7 @@ export declare class ProfessionalService {
         total_reviews: number;
         is_available: boolean;
         service_radius_km: number;
-    }[], number]>;
+    }>>;
     findOne(id: string): Promise<Professional>;
     update(id: string, updateDto: UpdateProfessionalDto): Promise<Professional>;
     remove(id: string): Promise<void>;

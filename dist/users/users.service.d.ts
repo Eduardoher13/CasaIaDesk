@@ -1,4 +1,5 @@
 import { Repository } from 'typeorm';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -56,7 +57,7 @@ export declare class UserService {
         updated_at: Date;
         deleted_at: Date | null;
     }>;
-    findAll(skip?: number, take?: number): Promise<[User[], number]>;
+    findAll(filters: PaginationQueryDto): Promise<import("../common/pagination/pagination.util").PaginatedResult<User>>;
     findOne(id: string): Promise<User>;
     update(id: string, updateDto: UpdateUserDto): Promise<User>;
     remove(id: string): Promise<void>;

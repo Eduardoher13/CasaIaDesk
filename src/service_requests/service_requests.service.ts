@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { toPaginatedResult } from '../common/pagination/pagination.util';
 import { ServiceRequest } from './entities/service-request.entity';
 import { CreateServiceRequestDto } from './dto/create-service-request.dto';
 import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
@@ -17,8 +19,18 @@ export class ServiceRequestService {
     return this.repository.save(entity);
   }
 
-  findAll(skip = 0, take = 10) {
-    return this.repository.findAndCount({ skip, take });
+  async findAll(filters: PaginationQueryDto) {
+    const { limit = 10, offset = 0 } = filters;
+
+    const qb = this.repository
+      .createQueryBuilder('serviceRequest')
+      .take(limit)
+      .skip(offset);
+
+    qb.orderBy('serviceRequest.created_at', 'DESC').addOrderBy('serviceRequest.id', 'DESC');
+
+    const [data, total] = await qb.getManyAndCount();
+    return toPaginatedResult(data, total, limit, offset);
   }
 
   async findOne(id: string) {

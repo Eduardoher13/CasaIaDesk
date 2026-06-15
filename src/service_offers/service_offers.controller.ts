@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { ServiceOfferService } from './service_offers.service';
 import { CreateServiceOfferDto } from './dto/create-service-offer.dto';
 import { UpdateServiceOfferDto } from './dto/update-service-offer.dto';
@@ -13,8 +14,8 @@ export class ServiceOfferController {
   }
 
   @Get()
-  findAll(@Query('skip') skip = '0', @Query('take') take = '10') {
-    return this.service.findAll(parseInt(skip), parseInt(take));
+  findAll(@Query() filters: PaginationQueryDto) {
+    return this.service.findAll(filters);
   }
 
   @Get(':id')

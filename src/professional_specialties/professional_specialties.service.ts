@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { toPaginatedResult } from '../common/pagination/pagination.util';
 import { ProfessionalSpecialty } from './entities/professional-specialty.entity';
 import { CreateProfessionalSpecialtyDto } from './dto/create-professional-specialty.dto';
 import { UpdateProfessionalSpecialtyDto } from './dto/update-professional-specialty.dto';
@@ -17,8 +19,18 @@ export class ProfessionalSpecialtyService {
     return this.repository.save(entity);
   }
 
-  findAll(skip = 0, take = 10) {
-    return this.repository.findAndCount({ skip, take });
+  async findAll(filters: PaginationQueryDto) {
+    const { limit = 10, offset = 0 } = filters;
+
+    const qb = this.repository
+      .createQueryBuilder('professionalSpecialty')
+      .take(limit)
+      .skip(offset);
+
+    qb.orderBy('professionalSpecialty.id', 'DESC');
+
+    const [data, total] = await qb.getManyAndCount();
+    return toPaginatedResult(data, total, limit, offset);
   }
 
   async findOne(professional_id: string, specialty_id: number) {

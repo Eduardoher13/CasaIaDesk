@@ -14,8 +14,8 @@
 
 | Aspecto | Detalle |
 |---------|---------|
-| **Listados** | `GET` devuelve tupla TypeORM: `[registros[], total]` |
-| **Paginación** | Query params: `skip` (default `0`), `take` (default `10`) |
+| **Listados** | `GET` devuelve `{ data, total, limit, offset }` |
+| **Paginación** | Query params: `offset` (default `0`), `limit` (default `10`, máx. `100`) |
 | **Crear** | `POST` con body JSON |
 | **Actualizar** | `PATCH` con campos parciales (todos opcionales) |
 | **Eliminar** | `DELETE` — hard delete en casi todo; **soft delete solo en `/users`** |
@@ -27,16 +27,27 @@
 ### Respuesta de listado (ejemplo)
 
 ```json
-[
-  [
-    { "id": "uuid...", "email": "cliente@mail.com", ... }
-  ],
-  42
-]
+{
+  "data": [{ "id": "uuid...", "email": "cliente@mail.com" }],
+  "total": 42,
+  "limit": 25,
+  "offset": 0
+}
 ```
 
-- Índice `[0]` → array de registros  
-- Índice `[1]` → total para paginación
+**Query params de paginación (todos los listados):**
+
+| Param | Default | Máximo | Descripción |
+|-------|---------|--------|-------------|
+| `offset` | `0` | — | Registros a saltar (ej. `25` para página 2 con limit=25) |
+| `limit` | `10` | `100` | Cantidad por página (ej. `limit=100`) |
+
+Ejemplos:
+- Primera página de 25: `?offset=0&limit=25`
+- Segunda página de 25: `?offset=25&limit=25`
+- Hasta 100 items: `?offset=0&limit=100`
+
+**Storefront** (`GET /companies/:id/storefront`): pagina solo los productos dentro de `products: { data, total, limit, offset }`.
 
 ### Respuesta de error (404)
 
@@ -348,9 +359,9 @@ Catálogo de productos de empresas. Las imágenes se guardan en **`image_url`** 
 | `PATCH` | `/products/:id` | Editar precio, stock, activar/desactivar |
 | `DELETE` | `/products/:id` | Eliminar producto |
 
-**GET `/products/active`** — query: `skip`, `take`, `search` (ILIKE en `name`)
+**GET `/products/active`** — query: `offset`, `limit`, `q` (ILIKE en `name`)
 
-**GET `/products/by-company/:companyId`** — query: `skip`, `take`
+**GET `/products/by-company/:companyId`** — query: `offset`, `limit`
 
 **PATCH `/products/:id/image`** — body: `{ "image_url": "https://..." }`
 
@@ -775,10 +786,11 @@ User (driver) ──→ Vehicle
 
 ## Notas para la IA de diseño UI
 
-1. **No hay filtros en backend** — los listados devuelven todo paginado; el frontend debe filtrar por `client_id`, `order_id`, etc. en memoria o pedir filtros futuros.
-2. **No hay auth/JWT** — diseñar login UI pero conectar IDs manualmente hasta implementar auth.
-3. **Decimales como string** — formatear precios con `parseFloat()` + `Intl.NumberFormat`.
-4. **Roles determinan layout** — usar `users.role` para mostrar nav distinto (cliente vs profesional vs empresa vs admin).
-5. **Flujos con mapa** — `deliveries`, `route-waypoints`, `delivery-tracking` y geolocalización en `users`/`service-requests` requieren componente mapa.
-6. **Estados visuales** — usar tablas de status de este doc para badges, steppers y empty states.
-7. **Chat** — flujo de 3 pasos: crear conversación → agregar participantes → enviar mensajes.
+1. **Paginación unificada** — todos los `GET` listados aceptan `offset` y `limit` (máx. 100) y responden `{ data, total, limit, offset }`. La lógica vive en los services (QueryBuilder), no en controllers.
+2. **No hay filtros extra en backend** — salvo `GET /products/active?q=`; el resto filtra en frontend o pide endpoints custom.
+3. **No hay auth/JWT** — diseñar login UI pero conectar IDs manualmente hasta implementar auth.
+4. **Decimales como string** — formatear precios con `parseFloat()` + `Intl.NumberFormat`.
+5. **Roles determinan layout** — usar `users.role` para mostrar nav distinto (cliente vs profesional vs empresa vs admin).
+6. **Flujos con mapa** — `deliveries`, `route-waypoints`, `delivery-tracking` y geolocalización en `users`/`service-requests` requieren componente mapa.
+7. **Estados visuales** — usar tablas de status de este doc para badges, steppers y empty states.
+8. **Chat** — flujo de 3 pasos: crear conversación → agregar participantes → enviar mensajes.

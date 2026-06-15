@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { ConversationParticipantService } from './conversation_participants.service';
 import { CreateConversationParticipantDto } from './dto/create-conversation-participant.dto';
 import { UpdateConversationParticipantDto } from './dto/update-conversation-participant.dto';
@@ -13,8 +14,8 @@ export class ConversationParticipantController {
   }
 
   @Get()
-  findAll(@Query('skip') skip = '0', @Query('take') take = '10') {
-    return this.service.findAll(parseInt(skip), parseInt(take));
+  findAll(@Query() filters: PaginationQueryDto) {
+    return this.service.findAll(filters);
   }
 
   @Get(':conversation_id/:user_id')

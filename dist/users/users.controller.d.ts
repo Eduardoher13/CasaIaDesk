@@ -1,3 +1,4 @@
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { UserService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -6,7 +7,7 @@ export declare class UserController {
     private readonly service;
     constructor(service: UserService);
     create(createDto: CreateUserDto): Promise<import("./entities/user.entity").User>;
-    findAll(skip?: string, take?: string): Promise<[import("./entities/user.entity").User[], number]>;
+    findAll(filters: PaginationQueryDto): Promise<import("../common/pagination/pagination.util").PaginatedResult<import("./entities/user.entity").User>>;
     findByEmail(email: string): Promise<{
         id: string;
         email: string;

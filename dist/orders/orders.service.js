@@ -16,6 +16,7 @@ exports.OrderService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const pagination_util_1 = require("../common/pagination/pagination.util");
 const order_entity_1 = require("./entities/order.entity");
 let OrderService = class OrderService {
     repository;
@@ -26,8 +27,15 @@ let OrderService = class OrderService {
         const entity = this.repository.create(createDto);
         return this.repository.save(entity);
     }
-    findAll(skip = 0, take = 10) {
-        return this.repository.findAndCount({ skip, take });
+    async findAll(filters) {
+        const { limit = 10, offset = 0 } = filters;
+        const qb = this.repository
+            .createQueryBuilder('order')
+            .take(limit)
+            .skip(offset);
+        qb.orderBy('order.created_at', 'DESC').addOrderBy('order.id', 'DESC');
+        const [data, total] = await qb.getManyAndCount();
+        return (0, pagination_util_1.toPaginatedResult)(data, total, limit, offset);
     }
     async findOne(id) {
         const entity = await this.repository.findOne({ where: { id } });

@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserMembershipController = void 0;
 const common_1 = require("@nestjs/common");
+const pagination_query_dto_1 = require("../common/dto/pagination-query.dto");
 const user_memberships_service_1 = require("./user_memberships.service");
 const create_user_membership_dto_1 = require("./dto/create-user-membership.dto");
 const update_user_membership_dto_1 = require("./dto/update-user-membership.dto");
@@ -25,8 +26,8 @@ let UserMembershipController = class UserMembershipController {
     create(createDto) {
         return this.service.create(createDto);
     }
-    findAll(skip = '0', take = '10') {
-        return this.service.findAll(parseInt(skip), parseInt(take));
+    findAll(filters) {
+        return this.service.findAll(filters);
     }
     findOne(id) {
         return this.service.findOne(id);
@@ -48,10 +49,9 @@ __decorate([
 ], UserMembershipController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
-    __param(0, (0, common_1.Query)('skip')),
-    __param(1, (0, common_1.Query)('take')),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", void 0)
 ], UserMembershipController.prototype, "findAll", null);
 __decorate([

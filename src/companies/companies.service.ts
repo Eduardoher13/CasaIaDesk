@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { toPaginatedResult } from '../common/pagination/pagination.util';
 import { Company } from './entities/company.entity';
 import { Product } from '../products/entities/product.entity';
 import { CreateCompanyDto } from './dto/create-company.dto';
@@ -20,8 +22,18 @@ export class CompanyService {
     return this.repository.save(entity);
   }
 
-  findAll(skip = 0, take = 10) {
-    return this.repository.findAndCount({ skip, take });
+  async findAll(filters: PaginationQueryDto) {
+    const { limit = 10, offset = 0 } = filters;
+
+    const qb = this.repository
+      .createQueryBuilder('company')
+      .take(limit)
+      .skip(offset);
+
+    qb.orderBy('company.id', 'DESC');
+
+    const [data, total] = await qb.getManyAndCount();
+    return toPaginatedResult(data, total, limit, offset);
   }
 
   async findByUserId(userId: string) {
@@ -34,13 +46,25 @@ export class CompanyService {
     return company;
   }
 
-  async getStorefront(id: string) {
+  async getStorefront(id: string, filters: PaginationQueryDto) {
+    const { limit = 10, offset = 0 } = filters;
     const company = await this.findOne(id);
-    const products = await this.productRepository.find({
-      where: { company_id: id, is_active: true },
-      order: { name: 'ASC' },
-    });
-    return { company, products };
+
+    const qb = this.productRepository
+      .createQueryBuilder('product')
+      .where('product.company_id = :companyId', { companyId: id })
+      .andWhere('product.is_active = :isActive', { isActive: true })
+      .take(limit)
+      .skip(offset);
+
+    qb.orderBy('product.name', 'ASC').addOrderBy('product.id', 'DESC');
+
+    const [products, total] = await qb.getManyAndCount();
+
+    return {
+      company,
+      products: toPaginatedResult(products, total, limit, offset),
+    };
   }
 
   async findOne(id: string) {

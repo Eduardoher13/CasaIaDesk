@@ -16,6 +16,7 @@ exports.ProfessionalSpecialtyService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const pagination_util_1 = require("../common/pagination/pagination.util");
 const professional_specialty_entity_1 = require("./entities/professional-specialty.entity");
 let ProfessionalSpecialtyService = class ProfessionalSpecialtyService {
     repository;
@@ -26,8 +27,15 @@ let ProfessionalSpecialtyService = class ProfessionalSpecialtyService {
         const entity = this.repository.create(createDto);
         return this.repository.save(entity);
     }
-    findAll(skip = 0, take = 10) {
-        return this.repository.findAndCount({ skip, take });
+    async findAll(filters) {
+        const { limit = 10, offset = 0 } = filters;
+        const qb = this.repository
+            .createQueryBuilder('professionalSpecialty')
+            .take(limit)
+            .skip(offset);
+        qb.orderBy('professionalSpecialty.id', 'DESC');
+        const [data, total] = await qb.getManyAndCount();
+        return (0, pagination_util_1.toPaginatedResult)(data, total, limit, offset);
     }
     async findOne(professional_id, specialty_id) {
         const entity = await this.repository.findOne({ where: { professional_id, specialty_id } });

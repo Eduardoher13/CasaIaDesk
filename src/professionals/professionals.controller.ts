@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { ProfessionalService } from './professionals.service';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
@@ -13,13 +14,13 @@ export class ProfessionalController {
   }
 
   @Get()
-  findAll(@Query('skip') skip = '0', @Query('take') take = '10') {
-    return this.service.findAll(parseInt(skip), parseInt(take));
+  findAll(@Query() filters: PaginationQueryDto) {
+    return this.service.findAll(filters);
   }
 
   @Get('available')
-  findAvailable(@Query('skip') skip = '0', @Query('take') take = '10') {
-    return this.service.findAvailable(parseInt(skip), parseInt(take));
+  findAvailable(@Query() filters: PaginationQueryDto) {
+    return this.service.findAvailable(filters);
   }
 
   @Get('by-user/:userId')
