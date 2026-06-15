@@ -8,7 +8,6 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { FindProductsDto } from './dto/find-products.dto';
 import { ProductService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -25,7 +24,7 @@ export class ProductController {
   }
 
   @Get()
-  findAll(@Query() filters: PaginationQueryDto) {
+  findAll(@Query() filters: FindProductsDto) {
     return this.service.findAll(filters);
   }
 
@@ -37,7 +36,7 @@ export class ProductController {
   @Get('by-company/:companyId')
   findByCompany(
     @Param('companyId') companyId: string,
-    @Query() filters: PaginationQueryDto,
+    @Query() filters: FindProductsDto,
   ) {
     return this.service.findByCompany(companyId, filters);
   }

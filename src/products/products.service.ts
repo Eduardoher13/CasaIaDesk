@@ -24,13 +24,18 @@ export class ProductService {
     return this.repository.save(entity);
   }
 
-  async findAll(filters: PaginationQueryDto) {
-    const { limit = 10, offset = 0 } = filters;
+  async findAll(filters: FindProductsDto) {
+    const { limit = 10, offset = 0, q } = filters;
 
     const qb = this.repository
       .createQueryBuilder('product')
       .take(limit)
       .skip(offset);
+
+    if (q?.trim()) {
+      qb.leftJoinAndSelect('product.company', 'company');
+      this.applyTextSearch(qb, q, { includeCompany: true });
+    }
 
     qb.orderBy('product.name', 'ASC').addOrderBy('product.id', 'DESC');
 
@@ -38,8 +43,8 @@ export class ProductService {
     return toPaginatedResult(data, total, limit, offset);
   }
 
-  async findByCompany(companyId: string, filters: PaginationQueryDto) {
-    const { limit = 50, offset = 0 } = filters;
+  async findByCompany(companyId: string, filters: FindProductsDto) {
+    const { limit = 50, offset = 0, q } = filters;
 
     const qb = this.repository
       .createQueryBuilder('product')
@@ -47,6 +52,8 @@ export class ProductService {
       .andWhere('product.is_active = :isActive', { isActive: true })
       .take(limit)
       .skip(offset);
+
+    this.applyTextSearch(qb, q, { includeCompany: false });
 
     qb.orderBy('product.name', 'ASC').addOrderBy('product.id', 'DESC');
 
@@ -59,19 +66,41 @@ export class ProductService {
 
     const qb = this.repository
       .createQueryBuilder('product')
+      .leftJoinAndSelect('product.company', 'company')
       .where('product.is_active = :isActive', { isActive: true })
       .take(limit)
       .skip(offset);
 
-    if (q?.trim()) {
-      const search = `%${q.trim()}%`;
-      qb.andWhere('product.name ILIKE :search', { search });
-    }
+    this.applyTextSearch(qb, q, { includeCompany: true });
 
     qb.orderBy('product.name', 'ASC').addOrderBy('product.id', 'DESC');
 
     const [data, total] = await qb.getManyAndCount();
     return toPaginatedResult(data, total, limit, offset);
+  }
+
+  /** ILIKE en nombre, descripción del producto y nombre comercial de la empresa. */
+  private applyTextSearch(
+    qb: ReturnType<Repository<Product>['createQueryBuilder']>,
+    q: string | undefined,
+    options: { includeCompany: boolean },
+  ) {
+    const term = q?.trim();
+    if (!term) {
+      return;
+    }
+
+    const search = `%${term}%`;
+    const conditions = [
+      'product.name ILIKE :search',
+      'product.description ILIKE :search',
+    ];
+
+    if (options.includeCompany) {
+      conditions.push('company.commercial_name ILIKE :search');
+    }
+
+    qb.andWhere(`(${conditions.join(' OR ')})`, { search });
   }
 
   async setImageUrl(id: string, imageUrl: string) {

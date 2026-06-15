@@ -359,9 +359,11 @@ Catálogo de productos de empresas. Las imágenes se guardan en **`image_url`** 
 | `PATCH` | `/products/:id` | Editar precio, stock, activar/desactivar |
 | `DELETE` | `/products/:id` | Eliminar producto |
 
-**GET `/products/active`** — query: `offset`, `limit`, `q` (ILIKE en `name`)
+**GET `/products`** — query: `offset`, `limit`, `q` (nombre, descripción o empresa)
 
-**GET `/products/by-company/:companyId`** — query: `offset`, `limit`
+**GET `/products/active`** — query: `offset`, `limit`, `q` (nombre, descripción o `commercial_name` de la empresa)
+
+**GET `/products/by-company/:companyId`** — query: `offset`, `limit`, `q` (nombre o descripción del producto)
 
 **PATCH `/products/:id/image`** — body: `{ "image_url": "https://..." }`
 
@@ -787,7 +789,7 @@ User (driver) ──→ Vehicle
 ## Notas para la IA de diseño UI
 
 1. **Paginación unificada** — todos los `GET` listados aceptan `offset` y `limit` (máx. 100) y responden `{ data, total, limit, offset }`. La lógica vive en los services (QueryBuilder), no en controllers.
-2. **No hay filtros extra en backend** — salvo `GET /products/active?q=`; el resto filtra en frontend o pide endpoints custom.
+2. **No hay filtros extra en backend** — salvo búsqueda `q` en productos (`name`, `description`, `company.commercial_name`); el resto filtra en frontend o pide endpoints custom.
 3. **No hay auth/JWT** — diseñar login UI pero conectar IDs manualmente hasta implementar auth.
 4. **Decimales como string** — formatear precios con `parseFloat()` + `Intl.NumberFormat`.
 5. **Roles determinan layout** — usar `users.role` para mostrar nav distinto (cliente vs profesional vs empresa vs admin).

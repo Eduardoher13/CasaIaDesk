@@ -14,7 +14,6 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductController = void 0;
 const common_1 = require("@nestjs/common");
-const pagination_query_dto_1 = require("../common/dto/pagination-query.dto");
 const find_products_dto_1 = require("./dto/find-products.dto");
 const products_service_1 = require("./products.service");
 const create_product_dto_1 = require("./dto/create-product.dto");
@@ -62,7 +61,7 @@ __decorate([
     (0, common_1.Get)(),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
+    __metadata("design:paramtypes", [find_products_dto_1.FindProductsDto]),
     __metadata("design:returntype", void 0)
 ], ProductController.prototype, "findAll", null);
 __decorate([
@@ -77,7 +76,7 @@ __decorate([
     __param(0, (0, common_1.Param)('companyId')),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, pagination_query_dto_1.PaginationQueryDto]),
+    __metadata("design:paramtypes", [String, find_products_dto_1.FindProductsDto]),
     __metadata("design:returntype", void 0)
 ], ProductController.prototype, "findByCompany", null);
 __decorate([
