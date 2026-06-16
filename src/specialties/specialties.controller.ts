@@ -18,6 +18,11 @@ export class SpecialtyController {
     return this.service.findAll(filters);
   }
 
+  @Get('slug/:slug')
+  findBySlug(@Param('slug') slug: string) {
+    return this.service.findBySlug(slug);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.service.findOne(id);

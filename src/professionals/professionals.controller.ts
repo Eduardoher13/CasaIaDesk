@@ -23,6 +23,14 @@ export class ProfessionalController {
     return this.service.findAvailable(filters);
   }
 
+  @Get('by-specialty/:slug')
+  findBySpecialtySlug(
+    @Param('slug') slug: string,
+    @Query() filters: PaginationQueryDto,
+  ) {
+    return this.service.findBySpecialtySlug(slug, filters);
+  }
+
   @Get('by-user/:userId')
   findByUserId(@Param('userId') userId: string) {
     return this.service.findByUserId(userId);

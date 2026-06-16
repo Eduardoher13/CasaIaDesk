@@ -43,6 +43,13 @@ let SpecialtyService = class SpecialtyService {
             throw new common_1.NotFoundException('Specialty #' + id + ' not found');
         return entity;
     }
+    async findBySlug(slug) {
+        const entity = await this.repository.findOne({ where: { slug } });
+        if (!entity) {
+            throw new common_1.NotFoundException(`Specialty with slug "${slug}" not found`);
+        }
+        return entity;
+    }
     async update(id, updateDto) {
         const entity = await this.findOne(id);
         Object.assign(entity, updateDto);

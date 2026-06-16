@@ -32,6 +32,9 @@ let ProfessionalController = class ProfessionalController {
     findAvailable(filters) {
         return this.service.findAvailable(filters);
     }
+    findBySpecialtySlug(slug, filters) {
+        return this.service.findBySpecialtySlug(slug, filters);
+    }
     findByUserId(userId) {
         return this.service.findByUserId(userId);
     }
@@ -67,6 +70,14 @@ __decorate([
     __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", void 0)
 ], ProfessionalController.prototype, "findAvailable", null);
+__decorate([
+    (0, common_1.Get)('by-specialty/:slug'),
+    __param(0, (0, common_1.Param)('slug')),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, pagination_query_dto_1.PaginationQueryDto]),
+    __metadata("design:returntype", void 0)
+], ProfessionalController.prototype, "findBySpecialtySlug", null);
 __decorate([
     (0, common_1.Get)('by-user/:userId'),
     __param(0, (0, common_1.Param)('userId')),

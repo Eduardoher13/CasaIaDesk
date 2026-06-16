@@ -39,6 +39,14 @@ export class SpecialtyService {
     return entity;
   }
 
+  async findBySlug(slug: string) {
+    const entity = await this.repository.findOne({ where: { slug } });
+    if (!entity) {
+      throw new NotFoundException(`Specialty with slug "${slug}" not found`);
+    }
+    return entity;
+  }
+
   async update(id: number, updateDto: UpdateSpecialtyDto) {
     const entity = await this.findOne(id);
     Object.assign(entity, updateDto);

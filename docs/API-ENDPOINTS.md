@@ -250,9 +250,16 @@ Perfil del **profesional** de servicios a domicilio.
 |--------|------|-------------------------------|
 | `POST` | `/professionals` | Onboarding profesional |
 | `GET` | `/professionals` | **Buscar profesionales** — cards con rating, precio, disponibilidad |
+| `GET` | `/professionals/available` | **Servicios destacados** — solo `is_available=true`, incluye `user` sin password |
+| `GET` | `/professionals/by-specialty/:slug` | **Profesionales por categoría Home** — ej. `fontaneria`, `emergencia` |
+| `GET` | `/professionals/by-user/:userId` | Perfil del profesional logueado |
 | `GET` | `/professionals/:id` | **Perfil público** — bio, años exp., rating, radio de servicio |
 | `PATCH` | `/professionals/:id` | Editar perfil, toggle disponibilidad, ajustar precio base |
 | `DELETE` | `/professionals/:id` | Eliminar perfil |
+
+**GET `/professionals/available`** y **`GET /professionals/by-specialty/:slug`** — query: `offset`, `limit`. Respuesta paginada `{ data, total, limit, offset }`; cada item incluye `user` sin `password_hash`.
+
+**GET `/professionals/by-specialty/:slug`** — slugs del Home: `electricidad`, `fontaneria`, `jardineria`, `pintura`, `remodelacion`, `emergencia`.
 
 **POST body:**
 
@@ -316,6 +323,7 @@ Categorías de servicios (plomería, electricidad, etc.).
 |--------|------|-------------------------------|
 | `POST` | `/specialties` | Admin: crear categoría |
 | `GET` | `/specialties` | **Grid/chips de categorías** en home y formulario de solicitud |
+| `GET` | `/specialties/slug/:slug` | **Resolver categoría Home** por slug (ej. `fontaneria`) |
 | `GET` | `/specialties/:id` | Detalle categoría |
 | `PATCH` | `/specialties/:id` | Admin: editar |
 | `DELETE` | `/specialties/:id` | Admin: eliminar |

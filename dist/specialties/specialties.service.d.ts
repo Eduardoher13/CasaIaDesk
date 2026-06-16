@@ -9,6 +9,7 @@ export declare class SpecialtyService {
     create(createDto: CreateSpecialtyDto): Promise<Specialty>;
     findAll(filters: PaginationQueryDto): Promise<import("../common/pagination/pagination.util").PaginatedResult<Specialty>>;
     findOne(id: number): Promise<Specialty>;
+    findBySlug(slug: string): Promise<Specialty>;
     update(id: number, updateDto: UpdateSpecialtyDto): Promise<Specialty>;
     remove(id: number): Promise<void>;
 }

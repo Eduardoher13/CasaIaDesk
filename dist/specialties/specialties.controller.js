@@ -29,6 +29,9 @@ let SpecialtyController = class SpecialtyController {
     findAll(filters) {
         return this.service.findAll(filters);
     }
+    findBySlug(slug) {
+        return this.service.findBySlug(slug);
+    }
     findOne(id) {
         return this.service.findOne(id);
     }
@@ -54,6 +57,13 @@ __decorate([
     __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", void 0)
 ], SpecialtyController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('slug/:slug'),
+    __param(0, (0, common_1.Param)('slug')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], SpecialtyController.prototype, "findBySlug", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),

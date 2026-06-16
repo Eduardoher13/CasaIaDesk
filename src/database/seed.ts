@@ -1,3 +1,11 @@
+/**
+ * Seed de datos demo para desarrollo.
+ *
+ *   npm run seed         — inserta solo si la BD no tiene demo@cliente.com
+ *   npm run seed:reset   — borra demo + re-inserta (6 categorías del Home)
+ *
+ * Requiere Postgres (npm run db:up) y backend en :8001 opcional.
+ */
 import { config } from 'dotenv';
 import { DataSource } from 'typeorm';
 import { entities } from './entities';
@@ -8,10 +16,17 @@ import { Company } from '../companies/entities/company.entity';
 import { Specialty } from '../specialties/entities/specialty.entity';
 import { ProfessionalSpecialty } from '../professional_specialties/entities/professional-specialty.entity';
 import { Product } from '../products/entities/product.entity';
+import {
+  DEMO_CLIENT_EMAIL,
+  DEMO_COMPANY_EMAIL,
+  DEMO_PROFESSIONALS,
+  DEMO_PRODUCTS,
+  HOME_SPECIALTIES,
+} from './seed-data';
 
 config();
 
-function createDataSource(): DataSource {
+export function createDataSource(): DataSource {
   const databaseUrl = process.env.DATABASE_URL;
 
   if (databaseUrl) {
@@ -39,63 +54,40 @@ function createDataSource(): DataSource {
   });
 }
 
-const DEMO_CLIENT_EMAIL = 'demo@cliente.com';
+export interface RunSeedOptions {
+  force?: boolean;
+}
 
-async function seed() {
-  const dataSource = createDataSource();
-  await dataSource.initialize();
-
+export async function runSeed(
+  dataSource: DataSource,
+  options: RunSeedOptions = {},
+): Promise<void> {
   const userRepo = dataSource.getRepository(User);
-  const existing = await userRepo.findOne({
-    where: { email: DEMO_CLIENT_EMAIL },
-  });
 
-  if (existing) {
-    console.log('Seed ya aplicado (demo@cliente.com existe). Saltando.');
-    await dataSource.destroy();
-    return;
+  if (!options.force) {
+    const existing = await userRepo.findOne({
+      where: { email: DEMO_CLIENT_EMAIL },
+    });
+
+    if (existing) {
+      console.log('Seed ya aplicado (demo@cliente.com existe). Saltando.');
+      console.log('  Usa: npm run seed:reset');
+      return;
+    }
   }
 
   const specialtyRepo = dataSource.getRepository(Specialty);
   const clientRepo = dataSource.getRepository(Client);
   const professionalRepo = dataSource.getRepository(Professional);
   const companyRepo = dataSource.getRepository(Company);
-  const professionalSpecialtyRepo = dataSource.getRepository(ProfessionalSpecialty);
+  const professionalSpecialtyRepo =
+    dataSource.getRepository(ProfessionalSpecialty);
   const productRepo = dataSource.getRepository(Product);
 
-  console.log('Insertando specialties...');
-  const specialties = await specialtyRepo.save([
-    {
-      name: 'Plomería',
-      slug: 'plomeria',
-      description: 'Instalaciones, fugas, tuberías y sanitarios',
-    },
-    {
-      name: 'Electricidad',
-      slug: 'electricidad',
-      description: 'Cableado, tableros, iluminación y reparaciones',
-    },
-    {
-      name: 'Jardinería',
-      slug: 'jardineria',
-      description: 'Mantenimiento de jardines, poda y paisajismo',
-    },
-    {
-      name: 'Limpieza',
-      slug: 'limpieza',
-      description: 'Limpieza profunda de hogar y oficina',
-    },
-    {
-      name: 'Pintura',
-      slug: 'pintura',
-      description: 'Pintura interior, exterior y acabados',
-    },
-    {
-      name: 'Carpintería',
-      slug: 'carpinteria',
-      description: 'Muebles, reparaciones y trabajos en madera',
-    },
-  ]);
+  console.log('Insertando specialties (6 categorías Home)...');
+  const specialties = await specialtyRepo.save(
+    HOME_SPECIALTIES.map((s) => ({ ...s })),
+  );
 
   console.log('Insertando usuario cliente demo...');
   const clientUser = await userRepo.save({
@@ -118,7 +110,7 @@ async function seed() {
 
   console.log('Insertando empresa demo y productos...');
   const companyUser = await userRepo.save({
-    email: 'tienda@empresa.com',
+    email: DEMO_COMPANY_EMAIL,
     password_hash: '$2b$10$demo.hash.placeholder',
     role: 'empresa',
     first_name: 'Casa',
@@ -135,67 +127,8 @@ async function seed() {
     logo_url: 'https://picsum.photos/seed/ferreteria/200/200',
   });
 
-  const productsData = [
-    {
-      name: 'Taladro inalámbrico 20V',
-      price: 89.99,
-      stock: 25,
-      image: 'https://picsum.photos/seed/taladro/400/400',
-      description: 'Taladro percutor con batería de litio y maletín.',
-    },
-    {
-      name: 'Juego de destornilladores',
-      price: 24.5,
-      stock: 60,
-      image: 'https://picsum.photos/seed/destornilladores/400/400',
-      description: 'Set de 12 piezas con mango ergonómico.',
-    },
-    {
-      name: 'Pintura látex blanco 1 gal',
-      price: 32.0,
-      stock: 40,
-      image: 'https://picsum.photos/seed/pintura/400/400',
-      description: 'Acabado mate, alta cobertura para interiores.',
-    },
-    {
-      name: 'Llave stillson 14"',
-      price: 18.75,
-      stock: 35,
-      image: 'https://picsum.photos/seed/llave/400/400',
-      description: 'Acero forjado para trabajos de plomería.',
-    },
-    {
-      name: 'Manguera reforzada 25m',
-      price: 45.0,
-      stock: 20,
-      image: 'https://picsum.photos/seed/manguera/400/400',
-      description: 'Ideal para riego y limpieza de exteriores.',
-    },
-    {
-      name: 'Foco LED 12W pack x4',
-      price: 12.99,
-      stock: 100,
-      image: 'https://picsum.photos/seed/foco/400/400',
-      description: 'Luz cálida, bajo consumo energético.',
-    },
-    {
-      name: 'Caja de herramientas plástica',
-      price: 29.99,
-      stock: 18,
-      image: 'https://picsum.photos/seed/caja/400/400',
-      description: 'Organizador con compartimentos y asa reforzada.',
-    },
-    {
-      name: 'Sierra circular 7 1/4"',
-      price: 119.0,
-      stock: 10,
-      image: 'https://picsum.photos/seed/sierra/400/400',
-      description: 'Corte preciso en madera y derivados.',
-    },
-  ];
-
   await productRepo.save(
-    productsData.map((p) => ({
+    DEMO_PRODUCTS.map((p) => ({
       company_id: company.id,
       name: p.name,
       description: p.description,
@@ -207,75 +140,12 @@ async function seed() {
     })),
   );
 
-  console.log('Insertando profesionales demo...');
-  const professionalsData = [
-    {
-      email: 'carlos.plomero@demo.com',
-      first_name: 'Carlos',
-      last_name: 'Ramírez',
-      avatar: 'https://i.pravatar.cc/150?u=carlos-plomero',
-      bio: 'Plomero certificado con 12 años de experiencia en residencias.',
-      years: 12,
-      base_price: 35,
-      rating: 4.8,
-      reviews: 47,
-      specialtySlugs: ['plomeria'],
-    },
-    {
-      email: 'ana.electrica@demo.com',
-      first_name: 'Ana',
-      last_name: 'Torres',
-      avatar: 'https://i.pravatar.cc/150?u=ana-electrica',
-      bio: 'Electricista residencial. Instalaciones seguras y garantizadas.',
-      years: 8,
-      base_price: 40,
-      rating: 4.9,
-      reviews: 62,
-      specialtySlugs: ['electricidad'],
-    },
-    {
-      email: 'luis.jardin@demo.com',
-      first_name: 'Luis',
-      last_name: 'Martínez',
-      avatar: 'https://i.pravatar.cc/150?u=luis-jardin',
-      bio: 'Especialista en jardines tropicales y mantenimiento semanal.',
-      years: 6,
-      base_price: 28,
-      rating: 4.6,
-      reviews: 31,
-      specialtySlugs: ['jardineria'],
-    },
-    {
-      email: 'rosa.limpieza@demo.com',
-      first_name: 'Rosa',
-      last_name: 'Herrera',
-      avatar: 'https://i.pravatar.cc/150?u=rosa-limpieza',
-      bio: 'Limpieza profunda de hogares y oficinas pequeñas.',
-      years: 5,
-      base_price: 25,
-      rating: 4.7,
-      reviews: 28,
-      specialtySlugs: ['limpieza'],
-    },
-    {
-      email: 'miguel.multiservicio@demo.com',
-      first_name: 'Miguel',
-      last_name: 'Vega',
-      avatar: 'https://i.pravatar.cc/150?u=miguel-multi',
-      bio: 'Pintor y carpintero. Proyectos completos llave en mano.',
-      years: 10,
-      base_price: 38,
-      rating: 4.5,
-      reviews: 39,
-      specialtySlugs: ['pintura', 'carpinteria'],
-    },
-  ];
-
+  console.log('Insertando profesionales demo (1+ por categoría)...');
   const slugToId = Object.fromEntries(
     specialties.map((s) => [s.slug, s.id]),
   );
 
-  for (const pro of professionalsData) {
+  for (const pro of DEMO_PROFESSIONALS) {
     const proUser = await userRepo.save({
       email: pro.email,
       password_hash: '$2b$10$demo.hash.placeholder',
@@ -298,26 +168,32 @@ async function seed() {
       service_radius_km: 25,
     });
 
-    for (const slug of pro.specialtySlugs) {
-      await professionalSpecialtyRepo.save({
-        professional_id: professional.id,
-        specialty_id: slugToId[slug],
-        is_primary: slug === pro.specialtySlugs[0],
-      });
-    }
+    await professionalSpecialtyRepo.save({
+      professional_id: professional.id,
+      specialty_id: slugToId[pro.specialtySlug],
+      is_primary: true,
+    });
   }
 
   console.log('Seed completado.');
   console.log('  Cliente demo : demo@cliente.com');
   console.log('  Empresa demo : tienda@empresa.com');
-  console.log(`  Productos    : ${productsData.length}`);
-  console.log(`  Profesionales: ${professionalsData.length}`);
+  console.log(`  Productos    : ${DEMO_PRODUCTS.length}`);
+  console.log(`  Profesionales: ${DEMO_PROFESSIONALS.length}`);
   console.log(`  Especialidades: ${specialties.length}`);
+  console.log('  Slugs        :', specialties.map((s) => s.slug).join(', '));
+}
 
+async function seed() {
+  const dataSource = createDataSource();
+  await dataSource.initialize();
+  await runSeed(dataSource);
   await dataSource.destroy();
 }
 
-seed().catch((err) => {
-  console.error('Error en seed:', err);
-  process.exit(1);
-});
+if (require.main === module) {
+  seed().catch((err) => {
+    console.error('Error en seed:', err);
+    process.exit(1);
+  });
+}

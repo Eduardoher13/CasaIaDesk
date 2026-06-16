@@ -64,6 +64,33 @@ export class ProfessionalService {
     return toPaginatedResult(data, total, limit, offset);
   }
 
+  async findBySpecialtySlug(slug: string, filters: PaginationQueryDto) {
+    const { limit = 10, offset = 0 } = filters;
+
+    const qb = this.repository
+      .createQueryBuilder('professional')
+      .leftJoinAndSelect('professional.user', 'user')
+      .innerJoin(
+        'professional_specialties',
+        'ps',
+        'ps.professional_id = professional.id',
+      )
+      .innerJoin('specialties', 'specialty', 'specialty.id = ps.specialty_id')
+      .where('specialty.slug = :slug', { slug })
+      .andWhere('professional.is_available = :isAvailable', { isAvailable: true })
+      .take(limit)
+      .skip(offset);
+
+    qb.orderBy('professional.avg_rating', 'DESC').addOrderBy(
+      'professional.id',
+      'DESC',
+    );
+
+    const [rows, total] = await qb.getManyAndCount();
+    const data = rows.map((p) => this.sanitizeProfessional(p));
+    return toPaginatedResult(data, total, limit, offset);
+  }
+
   async findOne(id: string) {
     const entity = await this.repository.findOne({ where: { id } });
     if (!entity) throw new NotFoundException('Professional #' + id + ' not found');
