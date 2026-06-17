@@ -15,6 +15,8 @@ import { ServiceAssignment } from '../service_assignments/entities/service-assig
 import { Order } from '../orders/entities/order.entity';
 import { OrderItem } from '../order_items/entities/order-item.entity';
 import { Review } from '../reviews/entities/review.entity';
+import { Delivery } from '../deliveries/entities/delivery.entity';
+import { DeliveryTracking } from '../delivery_tracking/entities/delivery-tracking.entity';
 
 config();
 
@@ -80,6 +82,8 @@ export async function deleteDemoData(dataSource: DataSource): Promise<void> {
   const orderRepo = dataSource.getRepository(Order);
   const orderItemRepo = dataSource.getRepository(OrderItem);
   const reviewRepo = dataSource.getRepository(Review);
+  const deliveryRepo = dataSource.getRepository(Delivery);
+  const deliveryTrackingRepo = dataSource.getRepository(DeliveryTracking);
 
   const companyIds = await findIds(companyRepo, 'user_id', demoUserIds);
   const productIds = await findIds(productRepo, 'company_id', companyIds);
@@ -127,18 +131,27 @@ export async function deleteDemoData(dataSource: DataSource): Promise<void> {
   await deleteByColumn(serviceOfferRepo, 'professional_id', professionalIds);
   await deleteByColumn(serviceRequestRepo, 'id', serviceRequestIds);
 
-  // 3. Órdenes y sus items.
+  // 3. Entregas (por orden demo o repartidor demo) y su tracking.
+  const deliveryIdSet = new Set<string>([
+    ...(await findIds(deliveryRepo, 'order_id', orderIds)),
+    ...(await findIds(deliveryRepo, 'driver_id', demoUserIds)),
+  ]);
+  const deliveryIds = [...deliveryIdSet];
+  await deleteByColumn(deliveryTrackingRepo, 'delivery_id', deliveryIds);
+  await deleteByColumn(deliveryRepo, 'id', deliveryIds);
+
+  // 4. Órdenes y sus items.
   await deleteByColumn(orderItemRepo, 'order_id', orderIds);
   await deleteByColumn(orderItemRepo, 'product_id', productIds);
   await deleteByColumn(orderRepo, 'id', orderIds);
 
-  // 4. Productos demo.
+  // 5. Productos demo.
   if (productIds.length > 0) {
     await deleteByColumn(productRepo, 'id', productIds);
     console.log(`  Productos demo eliminados (${companyIds.length} empresa(s)).`);
   }
 
-  // 5. Profesionales y sus especialidades.
+  // 6. Profesionales y sus especialidades.
   if (professionalIds.length > 0) {
     await deleteByColumn(
       professionalSpecialtyRepo,
@@ -149,7 +162,7 @@ export async function deleteDemoData(dataSource: DataSource): Promise<void> {
     console.log(`  Profesionales demo eliminados: ${professionalIds.length}`);
   }
 
-  // 6. Empresas, clientes y usuarios demo.
+  // 7. Empresas, clientes y usuarios demo.
   if (demoUserIds.length > 0) {
     await deleteByColumn(companyRepo, 'user_id', demoUserIds);
     await deleteByColumn(clientRepo, 'user_id', demoUserIds);
@@ -157,7 +170,7 @@ export async function deleteDemoData(dataSource: DataSource): Promise<void> {
     console.log(`  Usuarios demo eliminados: ${demoUserIds.length}`);
   }
 
-  // 7. Especialidades (Home + legacy).
+  // 8. Especialidades (Home + legacy).
   const slugsToRemove = [
     ...LEGACY_SPECIALTY_SLUGS,
     'electricidad',

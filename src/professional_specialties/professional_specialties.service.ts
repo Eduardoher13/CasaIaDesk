@@ -33,6 +33,13 @@ export class ProfessionalSpecialtyService {
     return toPaginatedResult(data, total, limit, offset);
   }
 
+  async findByProfessional(professionalId: string) {
+    const data = await this.repository.find({
+      where: { professional_id: professionalId },
+    });
+    return { data, total: data.length };
+  }
+
   async findOne(professional_id: string, specialty_id: number) {
     const entity = await this.repository.findOne({ where: { professional_id, specialty_id } });
     if (!entity) throw new NotFoundException('ProfessionalSpecialty not found');

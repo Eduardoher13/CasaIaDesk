@@ -41,6 +41,9 @@ export class OrderService {
 
   async update(id: string, updateDto: UpdateOrderDto) {
     const entity = await this.findOne(id);
+    if (updateDto.status === 'pagado' && !updateDto.paid_at && !entity.paid_at) {
+      updateDto.paid_at = new Date().toISOString();
+    }
     Object.assign(entity, updateDto);
     return this.repository.save(entity);
   }

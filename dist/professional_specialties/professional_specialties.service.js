@@ -37,6 +37,12 @@ let ProfessionalSpecialtyService = class ProfessionalSpecialtyService {
         const [data, total] = await qb.getManyAndCount();
         return (0, pagination_util_1.toPaginatedResult)(data, total, limit, offset);
     }
+    async findByProfessional(professionalId) {
+        const data = await this.repository.find({
+            where: { professional_id: professionalId },
+        });
+        return { data, total: data.length };
+    }
     async findOne(professional_id, specialty_id) {
         const entity = await this.repository.findOne({ where: { professional_id, specialty_id } });
         if (!entity)

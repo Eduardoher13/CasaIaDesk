@@ -20,6 +20,7 @@ import { Product } from '../products/entities/product.entity';
 import {
   DEMO_CLIENT_EMAIL,
   DEMO_COMPANY_EMAIL,
+  DEMO_DRIVER_EMAIL,
   DEMO_PASSWORD,
   DEMO_PROFESSIONALS,
   DEMO_PRODUCTS,
@@ -112,6 +113,21 @@ export async function runSeed(
     points_balance: 150,
   });
 
+  console.log('Insertando repartidor demo...');
+  await userRepo.save({
+    email: DEMO_DRIVER_EMAIL,
+    password_hash: passwordHash,
+    role: 'repartidor',
+    first_name: 'Diego',
+    last_name: 'Delivery',
+    phone: '+505 8888-0002',
+    avatar_url: 'https://i.pravatar.cc/150?u=demo-repartidor',
+    is_active: true,
+    city: 'Managua',
+    lat: 12.119,
+    lng: -86.274,
+  });
+
   console.log('Insertando empresa demo y productos...');
   const companyUser = await userRepo.save({
     email: DEMO_COMPANY_EMAIL,
@@ -182,6 +198,7 @@ export async function runSeed(
   console.log('Seed completado.');
   console.log('  Cliente demo : demo@cliente.com');
   console.log('  Empresa demo : tienda@empresa.com');
+  console.log('  Repartidor   : repartidor@demo.com');
   console.log(`  Productos    : ${DEMO_PRODUCTS.length}`);
   console.log(`  Profesionales: ${DEMO_PROFESSIONALS.length}`);
   console.log(`  Especialidades: ${specialties.length}`);

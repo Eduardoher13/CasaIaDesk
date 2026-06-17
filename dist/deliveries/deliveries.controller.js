@@ -18,6 +18,7 @@ const pagination_query_dto_1 = require("../common/dto/pagination-query.dto");
 const deliveries_service_1 = require("./deliveries.service");
 const create_delivery_dto_1 = require("./dto/create-delivery.dto");
 const update_delivery_dto_1 = require("./dto/update-delivery.dto");
+const directions_query_dto_1 = require("./dto/directions-query.dto");
 let DeliveryController = class DeliveryController {
     service;
     constructor(service) {
@@ -28,6 +29,9 @@ let DeliveryController = class DeliveryController {
     }
     findAll(filters) {
         return this.service.findAll(filters);
+    }
+    getDirections(query) {
+        return this.service.getDirections(query);
     }
     findOne(id) {
         return this.service.findOne(id);
@@ -54,6 +58,13 @@ __decorate([
     __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", void 0)
 ], DeliveryController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('directions'),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [directions_query_dto_1.DirectionsQueryDto]),
+    __metadata("design:returntype", void 0)
+], DeliveryController.prototype, "getDirections", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),

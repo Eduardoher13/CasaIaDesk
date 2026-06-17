@@ -3,6 +3,7 @@ import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { DeliveryService } from './deliveries.service';
 import { CreateDeliveryDto } from './dto/create-delivery.dto';
 import { UpdateDeliveryDto } from './dto/update-delivery.dto';
+import { DirectionsQueryDto } from './dto/directions-query.dto';
 
 @Controller('deliveries')
 export class DeliveryController {
@@ -16,6 +17,11 @@ export class DeliveryController {
   @Get()
   findAll(@Query() filters: PaginationQueryDto) {
     return this.service.findAll(filters);
+  }
+
+  @Get('directions')
+  getDirections(@Query() query: DirectionsQueryDto) {
+    return this.service.getDirections(query);
   }
 
   @Get(':id')

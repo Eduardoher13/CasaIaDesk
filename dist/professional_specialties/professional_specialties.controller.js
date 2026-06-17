@@ -29,6 +29,9 @@ let ProfessionalSpecialtyController = class ProfessionalSpecialtyController {
     findAll(filters) {
         return this.service.findAll(filters);
     }
+    findByProfessional(professionalId) {
+        return this.service.findByProfessional(professionalId);
+    }
     findOne(professional_id, specialty_id) {
         return this.service.findOne(professional_id, specialty_id);
     }
@@ -54,6 +57,13 @@ __decorate([
     __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", void 0)
 ], ProfessionalSpecialtyController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('by-professional/:professionalId'),
+    __param(0, (0, common_1.Param)('professionalId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ProfessionalSpecialtyController.prototype, "findByProfessional", null);
 __decorate([
     (0, common_1.Get)(':professional_id/:specialty_id'),
     __param(0, (0, common_1.Param)('professional_id')),

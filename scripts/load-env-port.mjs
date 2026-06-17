@@ -15,7 +15,11 @@ export function loadEnvFile() {
     if (eq === -1) continue;
     const key = trimmed.slice(0, eq).trim();
     const value = trimmed.slice(eq + 1).trim();
-    if (!(key in process.env)) {
+    // El .env es la fuente de verdad: un valor no vacío siempre gana
+    // (evita que una variable previa vacía oculte la del archivo).
+    if (value !== '') {
+      process.env[key] = value;
+    } else if (!(key in process.env)) {
       process.env[key] = value;
     }
   }

@@ -18,6 +18,11 @@ export class ProfessionalSpecialtyController {
     return this.service.findAll(filters);
   }
 
+  @Get('by-professional/:professionalId')
+  findByProfessional(@Param('professionalId') professionalId: string) {
+    return this.service.findByProfessional(professionalId);
+  }
+
   @Get(':professional_id/:specialty_id')
   findOne(@Param('professional_id') professional_id: string, @Param('specialty_id') specialty_id: number) {
     return this.service.findOne(professional_id, specialty_id);

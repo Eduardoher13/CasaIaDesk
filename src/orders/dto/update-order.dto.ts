@@ -15,5 +15,5 @@ export class UpdateOrderDto {
 
   @IsOptional()
   @IsDateString()
-  paid_at?: Date;
+  paid_at?: string;
 }

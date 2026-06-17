@@ -14,14 +14,17 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DeliveryService = void 0;
 const common_1 = require("@nestjs/common");
+const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const pagination_util_1 = require("../common/pagination/pagination.util");
 const delivery_entity_1 = require("./entities/delivery.entity");
 let DeliveryService = class DeliveryService {
     repository;
-    constructor(repository) {
+    configService;
+    constructor(repository, configService) {
         this.repository = repository;
+        this.configService = configService;
     }
     create(createDto) {
         const entity = this.repository.create(createDto);
@@ -52,11 +55,44 @@ let DeliveryService = class DeliveryService {
         const entity = await this.findOne(id);
         await this.repository.remove(entity);
     }
+    async getDirections(query) {
+        const apiKey = this.configService.get('GOOGLE_MAPS_API_KEY');
+        if (!apiKey) {
+            throw new common_1.InternalServerErrorException('GOOGLE_MAPS_API_KEY no configurada en el backend');
+        }
+        const origin = `${query.fromLat},${query.fromLng}`;
+        const destination = `${query.toLat},${query.toLng}`;
+        const url = 'https://maps.googleapis.com/maps/api/directions/json' +
+            `?origin=${origin}&destination=${destination}` +
+            `&mode=driving&key=${apiKey}`;
+        let response;
+        try {
+            response = await fetch(url);
+        }
+        catch {
+            throw new common_1.ServiceUnavailableException('No se pudo contactar a Google Directions');
+        }
+        if (!response.ok) {
+            throw new common_1.ServiceUnavailableException(`Google Directions respondió ${response.status}`);
+        }
+        const data = (await response.json());
+        if (data.status !== 'OK' || data.routes.length === 0) {
+            throw new common_1.ServiceUnavailableException(`Google Directions: ${data.error_message ?? data.status}`);
+        }
+        const route = data.routes[0];
+        const leg = route.legs?.[0];
+        return {
+            polyline_encoded: route.overview_polyline?.points ?? null,
+            distance_meters: leg?.distance?.value ?? null,
+            duration_seconds: leg?.duration?.value ?? null,
+        };
+    }
 };
 exports.DeliveryService = DeliveryService;
 exports.DeliveryService = DeliveryService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(delivery_entity_1.Delivery)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        config_1.ConfigService])
 ], DeliveryService);
 //# sourceMappingURL=deliveries.service.js.map

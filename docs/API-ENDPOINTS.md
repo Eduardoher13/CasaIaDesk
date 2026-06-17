@@ -232,6 +232,7 @@ Login real con JWT (bcrypt). El token se guarda en el cliente y se envía como `
 | Cliente | `demo@cliente.com` |
 | Empresa | `tienda@empresa.com` |
 | Profesional | `carlos.fontaneria@demo.com` (y otros `*.@demo.com`) |
+| Repartidor | `repartidor@demo.com` (usar su `id` como `driver_id` en `/deliveries`) |
 
 ---
 
@@ -728,9 +729,23 @@ Entregas de pedidos con tracking.
 |--------|------|-------------------------------|
 | `POST` | `/deliveries` | **Crear entrega** al confirmar pedido |
 | `GET` | `/deliveries` | Panel repartidor / cliente siguiendo envío |
+| `GET` | `/deliveries/directions` | **Ruta Google** — polyline + distancia + duración entre 2 puntos |
 | `GET` | `/deliveries/:id` | **Pantalla tracking** — mapa, direcciones, estado |
 | `PATCH` | `/deliveries/:id` | Actualizar estado, tiempos, polyline del mapa |
 | `DELETE` | `/deliveries/:id` | Cancelar entrega |
+
+**GET `/deliveries/directions`** — query: `fromLat`, `fromLng`, `toLat`, `toLng` (números).
+
+```json
+// GET /deliveries/directions?fromLat=12.119&fromLng=-86.274&toLat=12.125&toLng=-86.280
+{
+  "polyline_encoded": "y..._encoded_polyline",
+  "distance_meters": 4200,
+  "duration_seconds": 900
+}
+```
+
+Llama a Google Directions API con `GOOGLE_MAPS_API_KEY` del `.env` del backend. Usar el resultado directo en el `POST /deliveries`. Si la key falta → `500`; si Google falla → `503`.
 
 **POST body:**
 

@@ -4,14 +4,16 @@
 
 export const DEMO_CLIENT_EMAIL = 'demo@cliente.com';
 export const DEMO_COMPANY_EMAIL = 'tienda@empresa.com';
+export const DEMO_DRIVER_EMAIL = 'repartidor@demo.com';
 
 /** Password en texto plano para todos los usuarios demo (se hashea con bcrypt en el seed). */
 export const DEMO_PASSWORD = 'demo123';
 
-/** Emails de usuarios demo (cliente, empresa y profesionales). */
+/** Emails de usuarios demo (cliente, empresa, profesionales y repartidor). */
 export const DEMO_USER_EMAILS = [
   DEMO_CLIENT_EMAIL,
   DEMO_COMPANY_EMAIL,
+  DEMO_DRIVER_EMAIL,
   'carlos.fontaneria@demo.com',
   'ana.electrica@demo.com',
   'luis.jardin@demo.com',

@@ -8,6 +8,10 @@ export declare class ProfessionalSpecialtyService {
     constructor(repository: Repository<ProfessionalSpecialty>);
     create(createDto: CreateProfessionalSpecialtyDto): Promise<ProfessionalSpecialty>;
     findAll(filters: PaginationQueryDto): Promise<import("../common/pagination/pagination.util").PaginatedResult<ProfessionalSpecialty>>;
+    findByProfessional(professionalId: string): Promise<{
+        data: ProfessionalSpecialty[];
+        total: number;
+    }>;
     findOne(professional_id: string, specialty_id: number): Promise<ProfessionalSpecialty>;
     update(professional_id: string, specialty_id: number, updateDto: UpdateProfessionalSpecialtyDto): Promise<ProfessionalSpecialty>;
     remove(professional_id: string, specialty_id: number): Promise<void>;
