@@ -92,19 +92,28 @@ export class ProfessionalService {
   }
 
   async findOne(id: string) {
+    const entity = await this.repository.findOne({
+      where: { id },
+      relations: { user: true },
+    });
+    if (!entity) throw new NotFoundException('Professional #' + id + ' not found');
+    return this.sanitizeProfessional(entity);
+  }
+
+  private async findOneEntity(id: string) {
     const entity = await this.repository.findOne({ where: { id } });
     if (!entity) throw new NotFoundException('Professional #' + id + ' not found');
     return entity;
   }
 
   async update(id: string, updateDto: UpdateProfessionalDto) {
-    const entity = await this.findOne(id);
+    const entity = await this.findOneEntity(id);
     Object.assign(entity, updateDto);
     return this.repository.save(entity);
   }
 
   async remove(id: string) {
-    const entity = await this.findOne(id);
+    const entity = await this.findOneEntity(id);
     await this.repository.remove(entity);
   }
 

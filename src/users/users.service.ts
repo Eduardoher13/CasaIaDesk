@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { toPaginatedResult } from '../common/pagination/pagination.util';
 import { User } from './entities/user.entity';
@@ -36,7 +37,7 @@ export class UserService {
     const user = await this.repository.save(
       this.repository.create({
         email: registerDto.email,
-        password_hash: registerDto.password,
+        password_hash: await bcrypt.hash(registerDto.password, 10),
         role: registerDto.role,
         first_name: registerDto.first_name,
         last_name: registerDto.last_name,
@@ -59,6 +60,15 @@ export class UserService {
     if (!user) {
       throw new NotFoundException(`User with email ${email} not found`);
     }
+    return this.sanitizeUser(user);
+  }
+
+  /** Devuelve el usuario completo (incluye password_hash) o null. Solo para auth. */
+  findByEmailWithPassword(email: string) {
+    return this.repository.findOne({ where: { email } });
+  }
+
+  toSafeUser(user: User) {
     return this.sanitizeUser(user);
   }
 

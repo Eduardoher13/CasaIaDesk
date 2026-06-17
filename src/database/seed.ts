@@ -7,6 +7,7 @@
  * Requiere Postgres (npm run db:up) y backend en :8001 opcional.
  */
 import { config } from 'dotenv';
+import * as bcrypt from 'bcrypt';
 import { DataSource } from 'typeorm';
 import { entities } from './entities';
 import { User } from '../users/entities/user.entity';
@@ -19,6 +20,7 @@ import { Product } from '../products/entities/product.entity';
 import {
   DEMO_CLIENT_EMAIL,
   DEMO_COMPANY_EMAIL,
+  DEMO_PASSWORD,
   DEMO_PROFESSIONALS,
   DEMO_PRODUCTS,
   HOME_SPECIALTIES,
@@ -84,6 +86,8 @@ export async function runSeed(
     dataSource.getRepository(ProfessionalSpecialty);
   const productRepo = dataSource.getRepository(Product);
 
+  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
+
   console.log('Insertando specialties (6 categorías Home)...');
   const specialties = await specialtyRepo.save(
     HOME_SPECIALTIES.map((s) => ({ ...s })),
@@ -92,7 +96,7 @@ export async function runSeed(
   console.log('Insertando usuario cliente demo...');
   const clientUser = await userRepo.save({
     email: DEMO_CLIENT_EMAIL,
-    password_hash: '$2b$10$demo.hash.placeholder',
+    password_hash: passwordHash,
     role: 'cliente',
     first_name: 'María',
     last_name: 'González',
@@ -111,7 +115,7 @@ export async function runSeed(
   console.log('Insertando empresa demo y productos...');
   const companyUser = await userRepo.save({
     email: DEMO_COMPANY_EMAIL,
-    password_hash: '$2b$10$demo.hash.placeholder',
+    password_hash: passwordHash,
     role: 'empresa',
     first_name: 'Casa',
     last_name: 'Ferretería',
@@ -148,7 +152,7 @@ export async function runSeed(
   for (const pro of DEMO_PROFESSIONALS) {
     const proUser = await userRepo.save({
       email: pro.email,
-      password_hash: '$2b$10$demo.hash.placeholder',
+      password_hash: passwordHash,
       role: 'profesional',
       first_name: pro.first_name,
       last_name: pro.last_name,
@@ -182,6 +186,7 @@ export async function runSeed(
   console.log(`  Profesionales: ${DEMO_PROFESSIONALS.length}`);
   console.log(`  Especialidades: ${specialties.length}`);
   console.log('  Slugs        :', specialties.map((s) => s.slug).join(', '));
+  console.log(`  Password demo: ${DEMO_PASSWORD}`);
 }
 
 async function seed() {

@@ -88,7 +88,33 @@ export declare class ProfessionalController {
         is_available: boolean;
         service_radius_km: number;
     }>;
-    findOne(id: string): Promise<import("./entities/professional.entity").Professional>;
+    findOne(id: string): Promise<{
+        user: {
+            id: string;
+            email: string;
+            role: string;
+            first_name: string;
+            last_name: string;
+            phone: string | null;
+            avatar_url: string | null;
+            is_active: boolean;
+            lat: number | null;
+            lng: number | null;
+            city: string | null;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+        };
+        id: string;
+        user_id: string;
+        bio: string | null;
+        years_experience: number;
+        base_price: number | null;
+        avg_rating: number;
+        total_reviews: number;
+        is_available: boolean;
+        service_radius_km: number;
+    }>;
     update(id: string, updateDto: UpdateProfessionalDto): Promise<import("./entities/professional.entity").Professional>;
     remove(id: string): Promise<void>;
 }

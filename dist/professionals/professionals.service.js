@@ -77,18 +77,27 @@ let ProfessionalService = class ProfessionalService {
         return (0, pagination_util_1.toPaginatedResult)(data, total, limit, offset);
     }
     async findOne(id) {
+        const entity = await this.repository.findOne({
+            where: { id },
+            relations: { user: true },
+        });
+        if (!entity)
+            throw new common_1.NotFoundException('Professional #' + id + ' not found');
+        return this.sanitizeProfessional(entity);
+    }
+    async findOneEntity(id) {
         const entity = await this.repository.findOne({ where: { id } });
         if (!entity)
             throw new common_1.NotFoundException('Professional #' + id + ' not found');
         return entity;
     }
     async update(id, updateDto) {
-        const entity = await this.findOne(id);
+        const entity = await this.findOneEntity(id);
         Object.assign(entity, updateDto);
         return this.repository.save(entity);
     }
     async remove(id) {
-        const entity = await this.findOne(id);
+        const entity = await this.findOneEntity(id);
         await this.repository.remove(entity);
     }
     sanitizeProfessional(professional) {

@@ -41,6 +41,23 @@ export declare class UserService {
         updated_at: Date;
         deleted_at: Date | null;
     }>;
+    findByEmailWithPassword(email: string): Promise<User | null>;
+    toSafeUser(user: User): {
+        id: string;
+        email: string;
+        role: string;
+        first_name: string;
+        last_name: string;
+        phone: string | null;
+        avatar_url: string | null;
+        is_active: boolean;
+        lat: number | null;
+        lng: number | null;
+        city: string | null;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+    };
     updateLocation(id: string, locationDto: UpdateLocationDto): Promise<{
         id: string;
         email: string;

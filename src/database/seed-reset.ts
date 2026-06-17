@@ -1,10 +1,7 @@
 import { config } from 'dotenv';
-import { DataSource, In } from 'typeorm';
+import { DataSource, In, ObjectLiteral, Repository } from 'typeorm';
 import { createDataSource, runSeed } from './seed';
-import {
-  DEMO_USER_EMAILS,
-  LEGACY_SPECIALTY_SLUGS,
-} from './seed-data';
+import { DEMO_USER_EMAILS, LEGACY_SPECIALTY_SLUGS } from './seed-data';
 import { User } from '../users/entities/user.entity';
 import { Client } from '../clients/entities/client.entity';
 import { Professional } from '../professionals/entities/professional.entity';
@@ -12,6 +9,12 @@ import { Company } from '../companies/entities/company.entity';
 import { Product } from '../products/entities/product.entity';
 import { ProfessionalSpecialty } from '../professional_specialties/entities/professional-specialty.entity';
 import { Specialty } from '../specialties/entities/specialty.entity';
+import { ServiceRequest } from '../service_requests/entities/service-request.entity';
+import { ServiceOffer } from '../service_offers/entities/service-offer.entity';
+import { ServiceAssignment } from '../service_assignments/entities/service-assignment.entity';
+import { Order } from '../orders/entities/order.entity';
+import { OrderItem } from '../order_items/entities/order-item.entity';
+import { Review } from '../reviews/entities/review.entity';
 
 config();
 
@@ -22,12 +25,36 @@ const LEGACY_PROFESSIONAL_EMAILS = [
   'miguel.multiservicio@demo.com',
 ];
 
+/** Borra filas donde `column IN ids`, solo si hay ids. Devuelve los registros borrados por su id. */
+async function deleteByColumn<T extends ObjectLiteral>(
+  repo: Repository<T>,
+  column: keyof T & string,
+  ids: (string | number)[],
+): Promise<void> {
+  if (ids.length === 0) return;
+  await repo
+    .createQueryBuilder()
+    .delete()
+    .where(`${column} IN (:...ids)`, { ids })
+    .execute();
+}
+
+async function findIds<T extends ObjectLiteral>(
+  repo: Repository<T>,
+  column: keyof T & string,
+  ids: (string | number)[],
+): Promise<string[]> {
+  if (ids.length === 0) return [];
+  const rows = await repo
+    .createQueryBuilder('e')
+    .where(`e.${column} IN (:...ids)`, { ids })
+    .getMany();
+  return rows.map((r) => (r as ObjectLiteral).id as string);
+}
+
 export async function deleteDemoData(dataSource: DataSource): Promise<void> {
   const userRepo = dataSource.getRepository(User);
-  const allDemoEmails = [
-    ...DEMO_USER_EMAILS,
-    ...LEGACY_PROFESSIONAL_EMAILS,
-  ];
+  const allDemoEmails = [...DEMO_USER_EMAILS, ...LEGACY_PROFESSIONAL_EMAILS];
 
   const demoUsers = await userRepo.find({
     where: { email: In([...allDemoEmails]) },
@@ -47,37 +74,90 @@ export async function deleteDemoData(dataSource: DataSource): Promise<void> {
   const professionalSpecialtyRepo =
     dataSource.getRepository(ProfessionalSpecialty);
   const specialtyRepo = dataSource.getRepository(Specialty);
+  const serviceRequestRepo = dataSource.getRepository(ServiceRequest);
+  const serviceOfferRepo = dataSource.getRepository(ServiceOffer);
+  const serviceAssignmentRepo = dataSource.getRepository(ServiceAssignment);
+  const orderRepo = dataSource.getRepository(Order);
+  const orderItemRepo = dataSource.getRepository(OrderItem);
+  const reviewRepo = dataSource.getRepository(Review);
 
-  const demoCompanies = demoUserIds.length
-    ? await companyRepo.find({ where: { user_id: In(demoUserIds) } })
-    : [];
-  const companyIds = demoCompanies.map((c) => c.id);
+  const companyIds = await findIds(companyRepo, 'user_id', demoUserIds);
+  const productIds = await findIds(productRepo, 'company_id', companyIds);
+  const clientIds = await findIds(clientRepo, 'user_id', demoUserIds);
+  const professionalIds = await findIds(
+    professionalRepo,
+    'user_id',
+    demoUserIds,
+  );
+  const serviceRequestIds = await findIds(
+    serviceRequestRepo,
+    'client_id',
+    clientIds,
+  );
+  const orderIds = await findIds(orderRepo, 'client_id', clientIds);
 
-  if (companyIds.length > 0) {
-    await productRepo.delete({ company_id: In(companyIds) });
+  // Assignments demo (por solicitud, cliente o profesional demo).
+  const assignmentIdSet = new Set<string>([
+    ...(await findIds(
+      serviceAssignmentRepo,
+      'service_request_id',
+      serviceRequestIds,
+    )),
+    ...(await findIds(serviceAssignmentRepo, 'client_id', clientIds)),
+    ...(await findIds(
+      serviceAssignmentRepo,
+      'professional_id',
+      professionalIds,
+    )),
+  ]);
+  const assignmentIds = [...assignmentIdSet];
+
+  // 1. Reviews (referencian usuarios, assignments y productos demo).
+  await deleteByColumn(reviewRepo, 'reviewer_id', demoUserIds);
+  await deleteByColumn(reviewRepo, 'service_assignment_id', assignmentIds);
+  await deleteByColumn(reviewRepo, 'product_id', productIds);
+
+  // 2. Service assignments → offers → requests.
+  await deleteByColumn(serviceAssignmentRepo, 'id', assignmentIds);
+  await deleteByColumn(
+    serviceOfferRepo,
+    'service_request_id',
+    serviceRequestIds,
+  );
+  await deleteByColumn(serviceOfferRepo, 'professional_id', professionalIds);
+  await deleteByColumn(serviceRequestRepo, 'id', serviceRequestIds);
+
+  // 3. Órdenes y sus items.
+  await deleteByColumn(orderItemRepo, 'order_id', orderIds);
+  await deleteByColumn(orderItemRepo, 'product_id', productIds);
+  await deleteByColumn(orderRepo, 'id', orderIds);
+
+  // 4. Productos demo.
+  if (productIds.length > 0) {
+    await deleteByColumn(productRepo, 'id', productIds);
     console.log(`  Productos demo eliminados (${companyIds.length} empresa(s)).`);
   }
 
-  const demoProfessionals = demoUserIds.length
-    ? await professionalRepo.find({ where: { user_id: In(demoUserIds) } })
-    : [];
-  const professionalIds = demoProfessionals.map((p) => p.id);
-
+  // 5. Profesionales y sus especialidades.
   if (professionalIds.length > 0) {
-    await professionalSpecialtyRepo.delete({
-      professional_id: In(professionalIds),
-    });
-    await professionalRepo.delete({ id: In(professionalIds) });
+    await deleteByColumn(
+      professionalSpecialtyRepo,
+      'professional_id',
+      professionalIds,
+    );
+    await deleteByColumn(professionalRepo, 'id', professionalIds);
     console.log(`  Profesionales demo eliminados: ${professionalIds.length}`);
   }
 
+  // 6. Empresas, clientes y usuarios demo.
   if (demoUserIds.length > 0) {
-    await companyRepo.delete({ user_id: In(demoUserIds) });
-    await clientRepo.delete({ user_id: In(demoUserIds) });
-    await userRepo.delete({ id: In(demoUserIds) });
+    await deleteByColumn(companyRepo, 'user_id', demoUserIds);
+    await deleteByColumn(clientRepo, 'user_id', demoUserIds);
+    await deleteByColumn(userRepo, 'id', demoUserIds);
     console.log(`  Usuarios demo eliminados: ${demoUserIds.length}`);
   }
 
+  // 7. Especialidades (Home + legacy).
   const slugsToRemove = [
     ...LEGACY_SPECIALTY_SLUGS,
     'electricidad',
@@ -94,10 +174,9 @@ export async function deleteDemoData(dataSource: DataSource): Promise<void> {
 
   if (specialtiesToRemove.length > 0) {
     const specialtyIds = specialtiesToRemove.map((s) => s.id);
-    await professionalSpecialtyRepo.delete({
-      specialty_id: In(specialtyIds),
-    });
-    await specialtyRepo.delete({ id: In(specialtyIds) });
+    await deleteByColumn(professionalSpecialtyRepo, 'specialty_id', specialtyIds);
+    await deleteByColumn(serviceRequestRepo, 'specialty_id', specialtyIds);
+    await deleteByColumn(specialtyRepo, 'id', specialtyIds);
     console.log(`  Especialidades eliminadas: ${specialtiesToRemove.length}`);
   }
 }

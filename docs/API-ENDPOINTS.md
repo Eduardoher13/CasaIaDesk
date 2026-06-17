@@ -6,7 +6,7 @@
 
 **Formato:** JSON en request y response.
 
-**Autenticación:** No implementada aún en el backend. El frontend debe enviar IDs de usuario (`user_id`, `client_id`, etc.) según el rol activo en sesión.
+**Autenticación:** JWT vía `POST /auth/login` (ver sección Auth). Guardar `access_token` y enviarlo como `Authorization: Bearer <token>` en endpoints protegidos (`GET /auth/me`). El resto de endpoints aún reciben IDs (`user_id`, `client_id`, etc.) según el rol activo en sesión.
 
 ---
 
@@ -186,6 +186,52 @@ Default: `camioneta`. Otros valores libres en string.
 ---
 
 ## Endpoints por módulo
+
+---
+
+### 🔐 Auth — `/auth`
+
+Login real con JWT (bcrypt). El token se guarda en el cliente y se envía como `Authorization: Bearer <token>`.
+
+| Método | Ruta | Para qué sirve en el frontend |
+|--------|------|-------------------------------|
+| `POST` | `/auth/register` | Alta de usuario (hashea password con bcrypt) |
+| `POST` | `/auth/login` | **Pantalla de login** — valida email + password, devuelve token y user |
+| `GET` | `/auth/me` | Usuario actual a partir del token (header `Authorization`) |
+
+**POST `/auth/login` body:**
+
+```json
+{ "email": "demo@cliente.com", "password": "demo123" }
+```
+
+**Response:**
+
+```json
+{
+  "access_token": "eyJhbGciOiJ...",
+  "user": {
+    "id": "uuid",
+    "email": "demo@cliente.com",
+    "role": "cliente",
+    "first_name": "María",
+    "last_name": "González",
+    "avatar_url": "https://i.pravatar.cc/150?u=demo-cliente"
+  }
+}
+```
+
+- Credenciales inválidas → `401 Unauthorized`.
+- `GET /auth/me` requiere header `Authorization: Bearer <access_token>`; sin token o expirado → `401`.
+- JWT payload: `{ sub: user.id, email, role }`. Expira en `JWT_EXPIRES_IN` (default `7d`).
+
+**Usuarios demo (tras `npm run seed:reset`)** — password `demo123`:
+
+| Rol | Email |
+|-----|-------|
+| Cliente | `demo@cliente.com` |
+| Empresa | `tienda@empresa.com` |
+| Profesional | `carlos.fontaneria@demo.com` (y otros `*.@demo.com`) |
 
 ---
 
