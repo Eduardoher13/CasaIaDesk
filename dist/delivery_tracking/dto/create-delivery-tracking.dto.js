@@ -36,6 +36,6 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", Date)
+    __metadata("design:type", String)
 ], CreateDeliveryTrackingDto.prototype, "recorded_at", void 0);
 //# sourceMappingURL=create-delivery-tracking.dto.js.map

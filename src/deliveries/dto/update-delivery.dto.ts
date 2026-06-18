@@ -55,9 +55,9 @@ export class UpdateDeliveryDto {
 
   @IsOptional()
   @IsDateString()
-  started_at?: Date;
+  started_at?: string;
 
   @IsOptional()
   @IsDateString()
-  completed_at?: Date;
+  completed_at?: string;
 }

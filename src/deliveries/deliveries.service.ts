@@ -58,6 +58,9 @@ export class DeliveryService {
 
   async update(id: string, updateDto: UpdateDeliveryDto) {
     const entity = await this.findOne(id);
+    if (updateDto.status === 'entregado' && !updateDto.completed_at && !entity.completed_at) {
+      updateDto.completed_at = new Date().toISOString();
+    }
     Object.assign(entity, updateDto);
     return this.repository.save(entity);
   }

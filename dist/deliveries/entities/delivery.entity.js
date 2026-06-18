@@ -51,7 +51,7 @@ __decorate([
     __metadata("design:type", String)
 ], Delivery.prototype, "driver_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'vehicle_id', type: 'uuid' }),
+    (0, typeorm_1.Column)({ name: 'vehicle_id', type: 'uuid', nullable: true }),
     __metadata("design:type", Object)
 ], Delivery.prototype, "vehicle_id", void 0);
 __decorate([
@@ -83,11 +83,11 @@ __decorate([
     __metadata("design:type", Object)
 ], Delivery.prototype, "delivery_lng", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'distance_meters', type: 'int' }),
+    (0, typeorm_1.Column)({ name: 'distance_meters', type: 'int', nullable: true }),
     __metadata("design:type", Object)
 ], Delivery.prototype, "distance_meters", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'duration_seconds', type: 'int' }),
+    (0, typeorm_1.Column)({ name: 'duration_seconds', type: 'int', nullable: true }),
     __metadata("design:type", Object)
 ], Delivery.prototype, "duration_seconds", void 0);
 __decorate([

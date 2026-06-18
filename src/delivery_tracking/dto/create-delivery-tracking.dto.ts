@@ -15,5 +15,5 @@ export class CreateDeliveryTrackingDto {
 
   @IsOptional()
   @IsDateString()
-  recorded_at?: Date;
+  recorded_at?: string;
 }

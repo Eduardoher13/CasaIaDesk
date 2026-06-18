@@ -22,7 +22,7 @@ export class Delivery {
   @Column({ name: 'driver_id', type: 'uuid' })
   driver_id: string;
 
-  @Column({ name: 'vehicle_id', type: 'uuid' })
+  @Column({ name: 'vehicle_id', type: 'uuid', nullable: true })
   vehicle_id: string | null;
 
   @Column({ type: 'varchar', length: 50, nullable: true, default: 'pendiente' })
@@ -46,10 +46,10 @@ export class Delivery {
   @Column({ name: 'delivery_lng', type: 'decimal', precision: 10, scale: 7, nullable: true })
   delivery_lng: number | null;
 
-  @Column({ name: 'distance_meters', type: 'int' })
+  @Column({ name: 'distance_meters', type: 'int', nullable: true })
   distance_meters: number | null;
 
-  @Column({ name: 'duration_seconds', type: 'int' })
+  @Column({ name: 'duration_seconds', type: 'int', nullable: true })
   duration_seconds: number | null;
 
   @Column({ name: 'polyline_encoded', type: 'text', nullable: true })

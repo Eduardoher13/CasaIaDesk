@@ -15,7 +15,11 @@ export class DeliveryTrackingService {
   ) {}
 
   create(createDto: CreateDeliveryTrackingDto) {
-    const entity = this.repository.create(createDto);
+    const payload = {
+      ...createDto,
+      recorded_at: createDto.recorded_at ?? new Date().toISOString(),
+    };
+    const entity = this.repository.create(payload);
     return this.repository.save(entity);
   }
 
