@@ -19,11 +19,10 @@ import { ProfessionalSpecialty } from '../professional_specialties/entities/prof
 import { Product } from '../products/entities/product.entity';
 import {
   DEMO_CLIENT_EMAIL,
-  DEMO_COMPANY_EMAIL,
+  DEMO_COMPANIES,
   DEMO_DRIVER_EMAIL,
   DEMO_PASSWORD,
   DEMO_PROFESSIONALS,
-  DEMO_PRODUCTS,
   HOME_SPECIALTIES,
 } from './seed-data';
 
@@ -128,37 +127,42 @@ export async function runSeed(
     lng: -86.274,
   });
 
-  console.log('Insertando empresa demo y productos...');
-  const companyUser = await userRepo.save({
-    email: DEMO_COMPANY_EMAIL,
-    password_hash: passwordHash,
-    role: 'empresa',
-    first_name: 'Casa',
-    last_name: 'Ferretería',
-    avatar_url: 'https://i.pravatar.cc/150?u=demo-empresa',
-    is_active: true,
-    city: 'Managua',
-  });
-
-  const company = await companyRepo.save({
-    user_id: companyUser.id,
-    commercial_name: 'Ferretería El Tornillo',
-    ruc: 'J-12345678-9',
-    logo_url: 'https://picsum.photos/seed/ferreteria/200/200',
-  });
-
-  await productRepo.save(
-    DEMO_PRODUCTS.map((p) => ({
-      company_id: company.id,
-      name: p.name,
-      description: p.description,
-      image_url: p.image,
-      price: p.price,
-      stock: p.stock,
-      avg_rating: 4.5,
+  console.log('Insertando empresas demo (ferreterías) y productos...');
+  let totalProducts = 0;
+  for (const comp of DEMO_COMPANIES) {
+    const companyUser = await userRepo.save({
+      email: comp.email,
+      password_hash: passwordHash,
+      role: 'empresa',
+      first_name: comp.first_name,
+      last_name: comp.last_name,
+      avatar_url: comp.logo,
       is_active: true,
-    })),
-  );
+      city: comp.city,
+    });
+
+    const company = await companyRepo.save({
+      user_id: companyUser.id,
+      commercial_name: comp.commercial_name,
+      ruc: comp.ruc,
+      logo_url: comp.logo,
+    });
+
+    await productRepo.save(
+      comp.products.map((p) => ({
+        company_id: company.id,
+        name: p.name,
+        description: p.description,
+        image_url: p.image,
+        price: p.price,
+        stock: p.stock,
+        avg_rating: 4.5,
+        is_active: true,
+      })),
+    );
+
+    totalProducts += comp.products.length;
+  }
 
   console.log('Insertando profesionales demo (1+ por categoría)...');
   const slugToId = Object.fromEntries(
@@ -197,9 +201,14 @@ export async function runSeed(
 
   console.log('Seed completado.');
   console.log('  Cliente demo : demo@cliente.com');
-  console.log('  Empresa demo : tienda@empresa.com');
+  console.log('  Empresa demo : tienda@empresa.com (Ferretería SINSA)');
   console.log('  Repartidor   : repartidor@demo.com');
-  console.log(`  Productos    : ${DEMO_PRODUCTS.length}`);
+  console.log(`  Empresas     : ${DEMO_COMPANIES.length}`);
+  console.log(
+    '  Ferreterías  :',
+    DEMO_COMPANIES.map((c) => c.commercial_name).join(', '),
+  );
+  console.log(`  Productos    : ${totalProducts}`);
   console.log(`  Profesionales: ${DEMO_PROFESSIONALS.length}`);
   console.log(`  Especialidades: ${specialties.length}`);
   console.log('  Slugs        :', specialties.map((s) => s.slug).join(', '));

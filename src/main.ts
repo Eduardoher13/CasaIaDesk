@@ -33,12 +33,53 @@ async function listenOnPort(
   throw new Error(`No se pudo usar el puerto ${preferredPort}`);
 }
 
+function resolveCorsOrigin(configService: ConfigService): boolean | string[] {
+  const raw = configService.get<string>('CORS_ORIGIN');
+  if (!raw || raw.trim() === '' || raw.trim() === '*') {
+    // Sin CORS_ENV reflejamos cualquier origen (útil para apps móviles sin
+    // origin fijo). Define orígenes concretos para restringir en web.
+    return true;
+  }
+
+  return raw
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
+function checkProductionConfig(configService: ConfigService) {
+  // Avisos NO bloqueantes: el arranque continúa aunque falten valores ideales.
+  const jwtSecret = configService.get<string>('JWT_SECRET');
+  if (!jwtSecret || jwtSecret === 'casaia-dev-secret') {
+    console.warn(
+      '⚠️  JWT_SECRET usa el valor de desarrollo. Para mayor seguridad define ' +
+        'uno propio (p. ej. `openssl rand -hex 32`).',
+    );
+  }
+
+  if (configService.get<string>('DB_SYNCHRONIZE') === 'true') {
+    console.warn(
+      '⚠️  DB_SYNCHRONIZE=true en producción: riesgo de pérdida de datos. ' +
+        'Úsalo solo para el primer arranque y luego ponlo en false.',
+    );
+  }
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableShutdownHooks();
 
+  const configService = app.get(ConfigService);
+  const preferredPort = Number(configService.get<string>('PORT', '8001'));
+  const host = configService.get<string>('HOST', '0.0.0.0');
+  const isDev = configService.get<string>('NODE_ENV') !== 'production';
+
+  if (!isDev) {
+    checkProductionConfig(configService);
+  }
+
   app.enableCors({
-    origin: true,
+    origin: resolveCorsOrigin(configService),
     credentials: true,
   });
 
@@ -51,18 +92,14 @@ async function bootstrap() {
     }),
   );
 
-  const configService = app.get(ConfigService);
-  const preferredPort = Number(configService.get<string>('PORT', '8001'));
-  const host = configService.get<string>('HOST', '0.0.0.0');
-  const isDev = configService.get<string>('NODE_ENV') !== 'production';
-
   if (!Number.isInteger(preferredPort) || preferredPort < 1) {
     throw new Error(`Invalid PORT: ${configService.get('PORT')}`);
   }
 
+  // En producción no probamos puertos alternativos: el puerto lo fija el host.
   const port = await listenOnPort(app, preferredPort, isDev, host);
   console.log(`API running on http://localhost:${port}`);
-  if (host === '0.0.0.0') {
+  if (isDev && host === '0.0.0.0') {
     console.log(`Red local (celular): http://<IP-de-tu-Mac>:${port}`);
   }
 }
