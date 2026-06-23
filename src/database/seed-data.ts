@@ -7,13 +7,17 @@ export const DEMO_CLIENT_EMAIL = 'demo@cliente.com';
 export const DEMO_COMPANY_EMAIL = 'tienda@empresa.com';
 export const DEMO_DRIVER_EMAIL = 'repartidor@demo.com';
 
-/** Emails de todas las empresas demo (ferreterías nicaragüenses). */
-export const DEMO_COMPANY_EMAILS = [
-  DEMO_COMPANY_EMAIL,
-  'epa@empresa.com',
-  'jenny@empresa.com',
-  'blandon@empresa.com',
-] as const;
+/** Emails de todas las empresas demo (ferreterías de Managua). */
+import { DEMO_COMPANIES } from './seed-companies';
+export { DEMO_COMPANIES } from './seed-companies';
+export type { SeedProduct } from './seed-companies';
+
+export const DEMO_COMPANY_EMAILS = DEMO_COMPANIES.map(
+  (company) => company.email,
+) as unknown as readonly [
+  typeof DEMO_COMPANY_EMAIL,
+  ...string[],
+];
 
 /** Password en texto plano para todos los usuarios demo (se hashea con bcrypt en el seed). */
 export const DEMO_PASSWORD = 'demo123';
@@ -24,7 +28,7 @@ export const DEMO_USER_EMAILS = [
   DEMO_DRIVER_EMAIL,
   ...DEMO_COMPANY_EMAILS,
   'carlos.fontaneria@demo.com',
-  'ana.electrica@demo.com',
+  'mario.electrica@demo.com',
   'luis.jardin@demo.com',
   'maria.pintura@demo.com',
   'pedro.remodelacion@demo.com',
@@ -72,12 +76,17 @@ export const HOME_SPECIALTIES = [
   },
 ] as const;
 
+/** Emails demo renombrados (patch encuentra el usuario por el email viejo). */
+export const DEMO_PROFESSIONAL_LEGACY_EMAILS: Record<string, string> = {
+  'ana.electrica@demo.com': 'mario.electrica@demo.com',
+};
+
 export const DEMO_PROFESSIONALS = [
   {
-    email: 'ana.electrica@demo.com',
-    first_name: 'Ana',
-    last_name: 'Torres',
-    avatar: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&h=400&fit=crop&q=80',
+    email: 'mario.electrica@demo.com',
+    first_name: 'Mario',
+    last_name: 'Gutiérrez',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&q=80',
     bio: 'Electricista residencial. Instalaciones seguras y garantizadas.',
     years: 8,
     base_price: 40,
@@ -159,232 +168,4 @@ export const DEMO_PROFESSIONALS = [
   },
 ] as const;
 
-/**
- * Empresas demo: ferreterías nicaragüenses, cada una con su catálogo.
- * La primera (tienda@empresa.com) conserva el login demo de empresa.
- * Las imágenes con URL de tienda real (SINSA / Walmart NI) se conservan tal
- * cual; las nuevas usan loremflickr por nombre y puedes cambiarlas a una URL
- * real cuando quieras.
- */
-export const DEMO_COMPANIES = [
-  {
-    email: DEMO_COMPANY_EMAIL,
-    commercial_name: 'Ferretería SINSA',
-    first_name: 'Ferretería',
-    last_name: 'SINSA',
-    ruc: 'J0310000000001',
-    logo: 'https://loremflickr.com/200/200/hardware,store?lock=201',
-    city: 'Managua',
-    products: [
-      {
-        name: 'Taladro inalámbrico 20V',
-        price: 89.99,
-        stock: 25,
-        image:
-          'https://b2csinsa.vtexassets.com/arquivos/ids/616460/152737183-1.jpg?v=639010640795770000',
-        description:
-          'Taladro percutor con batería de litio. Ideal para electricidad y remodelación.',
-      },
-      {
-        name: 'Juego de destornilladores',
-        price: 24.5,
-        stock: 60,
-        image:
-          'https://www.bt-ingenieros.com/19461-large_default/destornilladores-de-precision-15-piezas-planoss-philllis-cruz-y-torx.jpg',
-        description: 'Set de 12 piezas con mango ergonómico.',
-      },
-      {
-        name: 'Caja de herramientas plástica',
-        price: 29.99,
-        stock: 18,
-        image:
-          'https://walmartni.vtexassets.com/arquivos/ids/352470/Caja-Herramientas-Handi-Works-Pl-stica-16-Pulgadas-2-14990.jpg?v=638420748980330000',
-        description: 'Organizador con compartimentos y asa reforzada.',
-      },
-      {
-        name: 'Sierra circular 7 1/4"',
-        price: 119.0,
-        stock: 10,
-        image: 'https://loremflickr.com/400/400/circular,saw?lock=108',
-        description: 'Corte preciso en madera. Útil en remodelación.',
-      },
-      {
-        name: 'Esmeriladora angular 4 1/2"',
-        price: 54.5,
-        stock: 22,
-        image: 'https://loremflickr.com/400/400/angle,grinder?lock=109',
-        description: 'Pulidora de 750W para corte y desbaste de metal.',
-      },
-      {
-        name: 'Martillo de uña 16oz',
-        price: 12.75,
-        stock: 50,
-        image: 'https://loremflickr.com/400/400/hammer,tool?lock=110',
-        description: 'Cabeza de acero forjado con mango antideslizante.',
-      },
-    ],
-  },
-  {
-    email: 'epa@empresa.com',
-    commercial_name: 'EPA Nicaragua',
-    first_name: 'EPA',
-    last_name: 'Nicaragua',
-    ruc: 'J0310000000002',
-    logo: 'https://loremflickr.com/200/200/construction,materials?lock=202',
-    city: 'Managua',
-    products: [
-      {
-        name: 'Saco de cemento Canal 42.5kg',
-        price: 9.5,
-        stock: 200,
-        image: 'https://loremflickr.com/400/400/cement,bag?lock=111',
-        description: 'Cemento gris uso general para construcción.',
-      },
-      {
-        name: 'Carretilla de construcción',
-        price: 65.0,
-        stock: 15,
-        image: 'https://loremflickr.com/400/400/wheelbarrow?lock=112',
-        description: 'Cuerpo metálico reforzado, llanta neumática.',
-      },
-      {
-        name: 'Pala cuadrada',
-        price: 14.25,
-        stock: 40,
-        image: 'https://loremflickr.com/400/400/shovel?lock=113',
-        description: 'Hoja de acero con mango de madera.',
-      },
-      {
-        name: 'Nivel de aluminio 24"',
-        price: 18.9,
-        stock: 30,
-        image: 'https://loremflickr.com/400/400/spirit,level?lock=114',
-        description: 'Tres burbujas, perfil de aluminio resistente.',
-      },
-      {
-        name: 'Cinta métrica 8m',
-        price: 7.99,
-        stock: 80,
-        image: 'https://loremflickr.com/400/400/tape,measure?lock=115',
-        description: 'Carcasa de goma con freno y gancho metálico.',
-      },
-      {
-        name: 'Escalera de aluminio 6 pies',
-        price: 89.0,
-        stock: 12,
-        image: 'https://loremflickr.com/400/400/ladder?lock=116',
-        description: 'Tipo tijera, liviana y de alta capacidad.',
-      },
-    ],
-  },
-  {
-    email: 'jenny@empresa.com',
-    commercial_name: 'Ferretería Jenny',
-    first_name: 'Ferretería',
-    last_name: 'Jenny',
-    ruc: 'J0310000000003',
-    logo: 'https://loremflickr.com/200/200/paint,store?lock=203',
-    city: 'Managua',
-    products: [
-      {
-        name: 'Pintura látex blanco 1 gal',
-        price: 32.0,
-        stock: 40,
-        image:
-          'https://b2csinsa.vtexassets.com/arquivos/ids/839869/100415692-1.jpg?v=639130243459330000',
-        description: 'Acabado mate, alta cobertura para interiores.',
-      },
-      {
-        name: 'Rodillo para pintura 9"',
-        price: 6.5,
-        stock: 70,
-        image: 'https://loremflickr.com/400/400/paint,roller?lock=117',
-        description: 'Felpa antigota con mango plástico.',
-      },
-      {
-        name: 'Brocha 4"',
-        price: 4.25,
-        stock: 90,
-        image: 'https://loremflickr.com/400/400/paintbrush?lock=118',
-        description: 'Cerda suave para acabados uniformes.',
-      },
-      {
-        name: 'Thinner 1 gal',
-        price: 11.0,
-        stock: 35,
-        image: 'https://loremflickr.com/400/400/solvent,can?lock=119',
-        description: 'Diluyente para pinturas y limpieza de herramientas.',
-      },
-      {
-        name: 'Lija para pared pack x10',
-        price: 5.75,
-        stock: 120,
-        image: 'https://loremflickr.com/400/400/sandpaper?lock=120',
-        description: 'Grano surtido para preparar superficies.',
-      },
-      {
-        name: 'Cinta adhesiva de pintor',
-        price: 3.5,
-        stock: 150,
-        image: 'https://loremflickr.com/400/400/masking,tape?lock=121',
-        description: 'Enmascarado limpio sin residuos.',
-      },
-    ],
-  },
-  {
-    email: 'blandon@empresa.com',
-    commercial_name: 'Ferretería Blandón Moreno',
-    first_name: 'Blandón',
-    last_name: 'Moreno',
-    ruc: 'J0310000000004',
-    logo: 'https://loremflickr.com/200/200/tools?lock=204',
-    city: 'Managua',
-    products: [
-      {
-        name: 'Foco LED 12W pack x4',
-        price: 12.99,
-        stock: 100,
-        image:
-          'https://papeleriadelahorro.mx/cdn/shop/products/1637050.jpg?v=1751744389',
-        description: 'Luz cálida, bajo consumo. Categoría electricidad.',
-      },
-      {
-        name: 'Llave stillson 14"',
-        price: 18.75,
-        stock: 35,
-        image:
-          'https://b2csinsa.vtexassets.com/arquivos/ids/616257/152735760-1.jpg?v=638950355265670000',
-        description: 'Acero forjado para trabajos de fontanería.',
-      },
-      {
-        name: 'Manguera reforzada 25m',
-        price: 45.0,
-        stock: 20,
-        image:
-          'https://walmartni.vtexassets.com/arquivos/ids/388111/Manguera-Truper-Reforzada-Con-3-Capas-15mts-2-9436.jpg?v=638496888477500000',
-        description: 'Ideal para riego y jardinería.',
-      },
-      {
-        name: 'Cable eléctrico THHN 100m',
-        price: 45.0,
-        stock: 25,
-        image: 'https://loremflickr.com/400/400/electrical,wire?lock=122',
-        description: 'Calibre 12, cobre, para instalaciones residenciales.',
-      },
-      {
-        name: 'Tubo PVC 1/2" x 6m',
-        price: 3.8,
-        stock: 160,
-        image: 'https://loremflickr.com/400/400/pvc,pipe?lock=123',
-        description: 'Para agua potable, presión estándar.',
-      },
-      {
-        name: 'Candado de seguridad 50mm',
-        price: 8.4,
-        stock: 75,
-        image: 'https://loremflickr.com/400/400/padlock?lock=124',
-        description: 'Cuerpo de latón con tres llaves.',
-      },
-    ],
-  },
-] as const;
+/** @deprecated Usar DEMO_COMPANIES en seed-companies.ts */

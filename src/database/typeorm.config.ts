@@ -1,6 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { entities } from './entities';
+import { resolvePgSsl } from './pg-ssl';
 
 export function buildTypeOrmConfig(
   configService: ConfigService,
@@ -17,14 +18,16 @@ export function buildTypeOrmConfig(
     autoLoadEntities: true,
   };
 
+  const ssl = resolvePgSsl({
+    databaseUrl,
+    dbSsl: configService.get<string>('DB_SSL'),
+  });
+
   if (databaseUrl) {
     return {
       ...common,
       url: databaseUrl,
-      ssl:
-        configService.get<string>('DB_SSL') === 'true'
-          ? { rejectUnauthorized: false }
-          : false,
+      ssl,
     };
   }
 
@@ -35,5 +38,6 @@ export function buildTypeOrmConfig(
     username: configService.get<string>('DB_USERNAME', 'postgres'),
     password: configService.get<string>('DB_PASSWORD', 'postgres'),
     database: configService.get<string>('DB_DATABASE', 'casa_ia_desk'),
+    ssl,
   };
 }
