@@ -25,26 +25,33 @@ import {
   DEMO_PROFESSIONALS,
   HOME_SPECIALTIES,
 } from './seed-data';
-import { resolvePgSsl } from './pg-ssl';
+import { parsePgDatabaseUrl } from './pg-ssl';
 
 config();
 
 export function createDataSource(): DataSource {
   const databaseUrl = process.env.DATABASE_URL;
-  const ssl = resolvePgSsl({
-    databaseUrl,
-    dbSsl: process.env.DB_SSL,
-  });
 
   if (databaseUrl) {
+    const connection = parsePgDatabaseUrl(databaseUrl, process.env.DB_SSL);
     return new DataSource({
       type: 'postgres',
-      url: databaseUrl,
-      ssl,
+      host: connection.host,
+      port: connection.port,
+      username: connection.username,
+      password: connection.password,
+      database: connection.database,
+      ssl: connection.ssl,
+      extra: connection.extra,
       entities,
       synchronize: process.env.DB_SYNCHRONIZE === 'true',
     });
   }
+
+  const ssl =
+    process.env.DB_SSL === 'true'
+      ? ({ rejectUnauthorized: false } as const)
+      : false;
 
   return new DataSource({
     type: 'postgres',
