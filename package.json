@@ -15,6 +15,7 @@
     "seed:reset": "ts-node -r tsconfig-paths/register src/database/seed-reset.ts",
     "seed:patch": "ts-node -r tsconfig-paths/register src/database/seed-patch-demo.ts",
     "seed": "ts-node -r tsconfig-paths/register src/database/seed.ts",
+    "db:schema": "ts-node -r tsconfig-paths/register src/database/schema-sync.ts",
     "db:up": "docker compose up -d postgres",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
